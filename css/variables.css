@@ -54,6 +54,9 @@
   --event-color-pink:   hsl(340, 52%, 50%);
   --event-color-purple: hsl(270, 38%, 48%);
   --event-color-teal:   hsl(178, 42%, 40%);
+  --event-color-red:    hsl(4, 70%, 50%);
+  --event-color-gray:   hsl(0, 0%, 55%);
+  --event-color-default: hsl(24, 30%, 45%); /* 구글 캘린더 기본 색상 (빈티지 톤) */
 
   /* ── 폰트 ── */
   --font-family:        'Georgia', 'Times New Roman', serif;

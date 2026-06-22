@@ -48,7 +48,7 @@ const DataManager = (() => {
       startTime: null,
       endTime: null,
       location: null,
-      color: 'orange',
+      color: 'red',
       allDay: true
     },
     {
@@ -58,7 +58,7 @@ const DataManager = (() => {
       startTime: '14:00',
       endTime: '15:30',
       location: '온라인 (Zoom)',
-      color: 'purple',
+      color: 'default',
       allDay: false
     },
     {
@@ -83,23 +83,36 @@ const DataManager = (() => {
     },
     {
       id: 'evt-007',
-      title: '주말 여행',
-      date: '2026-06-28',
+      title: '제주도 워크샵',
+      date: '2026-06-27',
       startTime: null,
       endTime: null,
-      location: '속초',
-      color: 'green',
-      allDay: true
+      location: '제주도',
+      color: 'orange',
+      allDay: true,
+      multiDayState: 'start'
     },
     {
       id: 'evt-008',
-      title: '주말 여행',
+      title: '제주도 워크샵',
+      date: '2026-06-28',
+      startTime: null,
+      endTime: null,
+      location: '제주도',
+      color: 'orange',
+      allDay: true,
+      multiDayState: 'middle'
+    },
+    {
+      id: 'evt-008b',
+      title: '제주도 워크샵',
       date: '2026-06-29',
       startTime: null,
       endTime: null,
-      location: '속초',
-      color: 'green',
-      allDay: true
+      location: '제주도',
+      color: 'orange',
+      allDay: true,
+      multiDayState: 'end'
     },
     {
       id: 'evt-009',
@@ -143,11 +156,39 @@ const DataManager = (() => {
     }
   ];
 
+  // ── 캐시 키 ──
+  const CACHE_KEY = 'g_cached_events';
+
   // ── 활성 이벤트 배열 (동적 교체 가능) ──
   let _events = [..._mockEvents];
 
   // ── 데이터 소스 상태 ('mock' | 'google') ──
   let _source = 'mock';
+
+  // ── 초기화 시 캐시 로드 ──
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    // 수동 로그아웃 시에만 캐시를 지우므로, 캐시가 있다면 이전 자동 로그아웃 상태이거나 로그인 상태임
+    if (cached) {
+      _events = JSON.parse(cached);
+      _source = 'google';
+    }
+  } catch (e) {
+    console.warn('[DataManager] 캐시된 일정을 불러오지 못했습니다.', e);
+  }
+
+  /**
+   * 로컬 스토리지에 이벤트를 저장한다.
+   */
+  function _saveCache() {
+    if (_source === 'google') {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(_events));
+      } catch (e) {
+        console.warn('[DataManager] 일정 캐싱 실패', e);
+      }
+    }
+  }
 
   /**
    * 외부에서 이벤트 배열을 주입한다. (Google Calendar 연동용)
@@ -156,6 +197,7 @@ const DataManager = (() => {
   function setEvents(eventArray) {
     _events = [...eventArray];
     _source = 'google';
+    _saveCache();
   }
 
   /**
@@ -168,6 +210,7 @@ const DataManager = (() => {
     const newEvents = eventArray.filter(e => !existingIds.has(e.id));
     _events = [..._events, ...newEvents];
     _source = 'google';
+    _saveCache();
   }
 
   /**
@@ -184,6 +227,7 @@ const DataManager = (() => {
   function resetToMock() {
     _events = [..._mockEvents];
     _source = 'mock';
+    localStorage.removeItem(CACHE_KEY);
   }
 
   /**
@@ -223,36 +267,24 @@ const DataManager = (() => {
       });
   }
 
-  /**
-   * 특정 월(year, month)에 이벤트가 있는 날짜 Set을 반환한다.
-   * @param {number} year
-   * @param {number} month - 0~11
-   * @returns {Map<string, Array>} dateStr -> color 배열
-   */
-  function getEventDotsForMonth(year, month) {
-    const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
-    const dotsMap = new Map();
+  function getEventsMapForMonth(year, month) {
+    const eventsMap = new Map();
 
     _events.forEach(evt => {
-      if (evt.date.startsWith(prefix)) {
-        if (!dotsMap.has(evt.date)) {
-          dotsMap.set(evt.date, []);
-        }
-        const colors = dotsMap.get(evt.date);
-        if (!colors.includes(evt.color)) {
-          colors.push(evt.color);
-        }
+      if (!eventsMap.has(evt.date)) {
+        eventsMap.set(evt.date, []);
       }
+      eventsMap.get(evt.date).push(evt);
     });
 
-    return dotsMap;
+    return eventsMap;
   }
 
   // Public API
   return {
     getAllEvents,
     getEventsByDate,
-    getEventDotsForMonth,
+    getEventsMapForMonth,
     setEvents,
     appendEvents,
     clearEvents,

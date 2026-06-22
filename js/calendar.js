@@ -162,7 +162,7 @@ const CalendarRenderer = (() => {
    */
   function _buildGrid(year, month) {
     const cells   = _buildDateCells(year, month);
-    const dotsMap = DataManager.getEventDotsForMonth(year, month);
+    const eventsMap = DataManager.getEventsMapForMonth(year, month);
 
     const grid = document.createElement('div');
     grid.className = 'date-grid';
@@ -171,7 +171,7 @@ const CalendarRenderer = (() => {
     grid.setAttribute('aria-label', '월간 달력');
 
     const fragment = document.createDocumentFragment();
-    cells.forEach(cell => fragment.appendChild(_createCellElement(cell, dotsMap)));
+    cells.forEach(cell => fragment.appendChild(_createCellElement(cell, eventsMap)));
     grid.appendChild(fragment);
 
     return grid;
@@ -216,8 +216,16 @@ const CalendarRenderer = (() => {
     return cells;
   }
 
+  /** 색상 기반 이벤트 분류 (사용자가 직접 칠한 색상에 따라 효과 부여) */
+  function _categorizeEventByColor(color) {
+    if (['red', 'pink', 'blue', 'purple'].includes(color)) return 'pin';
+    if (['green', 'teal'].includes(color)) return 'stamp';
+    if (['orange'].includes(color)) return 'sticker';
+    return 'hole'; // gray, default 등
+  }
+
   /** 셀 DOM 요소 생성 */
-  function _createCellElement(cell, dotsMap) {
+  function _createCellElement(cell, eventsMap) {
     const el = document.createElement('div');
     el.className = 'date-cell';
     el.dataset.date = cell.dateStr;
@@ -234,19 +242,54 @@ const CalendarRenderer = (() => {
     numEl.textContent = cell.day;
     el.appendChild(numEl);
 
-    // 일정 도트
-    const dotsEl = document.createElement('div');
-    dotsEl.className = 'date-cell__dots';
-    const colors = dotsMap.get(cell.dateStr);
-    if (colors) {
-      colors.slice(0, 3).forEach(color => {
-        const dot = document.createElement('span');
-        dot.className = 'date-cell__dot';
-        dot.style.background = `var(--event-color-${color})`;
-        dotsEl.appendChild(dot);
+    // 일정 아날로그 인디케이터 & 하이라이터
+    const events = eventsMap.get(cell.dateStr);
+    if (events && events.length > 0) {
+      // 하이라이터 컨테이너
+      const highlightersEl = document.createElement('div');
+      highlightersEl.className = 'date-cell__highlighters';
+      el.appendChild(highlightersEl);
+
+      let analogCount = 0;
+
+      events.forEach((evt, idx) => {
+        const state = evt.multiDayState || 'single';
+
+        // 1. 형광펜 효과 (멀티데이 일정인 경우)
+        if (state !== 'single') {
+          const highlighter = document.createElement('div');
+          highlighter.className = `highlighter-bar highlighter-bar--${state}`;
+          highlighter.style.backgroundColor = `var(--event-color-${evt.color})`;
+          highlightersEl.appendChild(highlighter);
+        }
+
+        // 2. 아날로그 인디케이터 (단일 일정, 또는 멀티데이 시작일이고 최대 2개 이하일 때)
+        if ((state === 'single' || state === 'start') && analogCount < 2) {
+          const type = _categorizeEventByColor(evt.color);
+          const indicator = document.createElement('div');
+          
+          if (type === 'pin') {
+            indicator.className = `indicator-pin`;
+            indicator.style.background = `radial-gradient(circle at 30% 30%, #fff 10%, var(--event-color-${evt.color}) 80%, rgba(0,0,0,0.5) 120%)`;
+          } else if (type === 'sticker') {
+            indicator.className = `indicator-sticker`;
+            indicator.style.borderTopColor = `var(--event-color-${evt.color})`;
+            indicator.style.transform = `rotate(${analogCount === 0 ? '-4deg' : '3deg'})`;
+          } else if (type === 'stamp') {
+            indicator.className = `indicator-stamp`;
+            indicator.textContent = '!';
+            indicator.style.color = `var(--event-color-${evt.color})`;
+            indicator.style.borderColor = `var(--event-color-${evt.color})`;
+            indicator.style.transform = `rotate(${analogCount === 0 ? '-12deg' : '10deg'})`;
+          } else {
+            indicator.className = `indicator-hole`;
+          }
+          
+          el.appendChild(indicator);
+          analogCount++;
+        }
       });
     }
-    el.appendChild(dotsEl);
 
     el.addEventListener('click', () => _selectDate(cell.dateStr));
     return el;

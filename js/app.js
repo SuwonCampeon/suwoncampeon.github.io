@@ -115,7 +115,7 @@ const App = (() => {
     const btnLogout = document.getElementById('btn-google-logout');
     if (btnLogout) {
       btnLogout.addEventListener('click', () => {
-        GoogleAuth.signOut();
+        GoogleAuth.signOut(true);
       });
     }
   }
@@ -147,11 +147,16 @@ const App = (() => {
 
     } catch (error) {
       console.error('[App] Google 일정 로드 실패:', error);
-      alert(`일정 동기화 실패: ${error.message}\n(권한 체크박스를 모두 선택했는지 확인해주세요.)`);
+      
+      if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        alert('오프라인 상태이거나 네트워크에 연결할 수 없습니다.\n기기에 저장된 과거 일정을 표시합니다.');
+      } else {
+        alert(`일정 동기화 실패: ${error.message}\n(권한 체크박스를 모두 선택했는지 확인해주세요.)`);
 
-      if (error.status === 401 || error.status === 403) {
-        // 토큰 만료 또는 권한 부족 → 재인증 시도 유도
-        GoogleAuth.signOut();
+        if (error.status === 401 || error.status === 403) {
+          // 토큰 만료 또는 권한 부족 → 재인증 시도 유도 (자동 로그아웃)
+          GoogleAuth.signOut(false);
+        }
       }
     } finally {
       _showSyncIndicator(false);
@@ -160,16 +165,21 @@ const App = (() => {
 
   /**
    * Google 로그아웃 콜백
+   * @param {boolean} isManual - 사용자가 직접 로그아웃했는지 여부
    */
-  function _onGoogleSignOut() {
+  function _onGoogleSignOut(isManual = true) {
     // UI 상태 전환: 사용자 정보 → 로그인 버튼
     _updateAuthUI(false, null);
 
-    // Mock 데이터로 복원
-    DataManager.resetToMock();
-
-    // 화면 재렌더링
-    _refreshCalendar();
+    if (isManual) {
+      // 수동 로그아웃 시에만 캐시 삭제 및 Mock 데이터로 복원
+      DataManager.resetToMock();
+      // 화면 재렌더링
+      _refreshCalendar();
+    } else {
+      // 자동 로그아웃 시에는 캐시된 구글 캘린더 데이터를 화면에 그대로 유지
+      console.log('[App] 자동 로그아웃 됨. 캐시된 일정을 화면에 유지합니다.');
+    }
   }
 
   /**
@@ -197,7 +207,11 @@ const App = (() => {
 
     } catch (error) {
       console.error('[App] 월별 일정 로드 실패:', error);
-      alert(`월별 일정 로드 실패: ${error.message}`);
+      if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        alert('오프라인 상태이거나 네트워크에 연결할 수 없습니다.\n기기에 저장된 과거 일정을 표시합니다.');
+      } else {
+        alert(`월별 일정 로드 실패: ${error.message}`);
+      }
     } finally {
       _showSyncIndicator(false);
     }

@@ -11,22 +11,18 @@ const GoogleCalendarAPI = (() => {
 
   // ── Google colorId → 앱 내부 색상 매핑 ──
   const COLOR_MAP = {
-    '1':  'blue',     // Lavender   → blue
-    '2':  'green',    // Sage       → green
-    '3':  'purple',   // Grape      → purple
-    '4':  'pink',     // Flamingo   → pink
-    '5':  'orange',   // Banana     → orange
-    '6':  'orange',   // Tangerine  → orange
-    '7':  'teal',     // Peacock    → teal
-    '8':  'blue',     // Blueberry  → blue
-    '9':  'blue',     // Basil      → blue
-    '10': 'green',    // Tomato     → green
-    '11': 'pink',     // Calender   → pink
+    '1':  'purple',   // Lavender
+    '2':  'green',    // Sage
+    '3':  'purple',   // Grape
+    '4':  'pink',     // Flamingo
+    '5':  'orange',   // Banana
+    '6':  'orange',   // Tangerine
+    '7':  'teal',     // Peacock
+    '8':  'gray',     // Graphite
+    '9':  'blue',     // Blueberry
+    '10': 'green',    // Basil
+    '11': 'red',      // Tomato
   };
-
-  // ── 기본 색상 순환 (colorId 없는 경우) ──
-  const DEFAULT_COLORS = ['blue', 'green', 'orange', 'purple', 'teal', 'pink'];
-  let _colorIndex = 0;
 
   /**
    * 특정 기간의 이벤트를 가져온다.
@@ -102,7 +98,16 @@ const GoogleCalendarAPI = (() => {
 
       // endDate는 exclusive이므로 하루 전까지 생성
       const current = new Date(startDate);
-      while (current < endDate) {
+      const totalDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+
+      for (let dayCount = 0; dayCount < totalDays; dayCount++) {
+        let multiDayState = 'single';
+        if (totalDays > 1) {
+          if (dayCount === 0) multiDayState = 'start';
+          else if (dayCount === totalDays - 1) multiDayState = 'end';
+          else multiDayState = 'middle';
+        }
+
         events.push({
           id:        `g-${gEvent.id}-${_formatDate(current)}`,
           title:     title,
@@ -111,7 +116,8 @@ const GoogleCalendarAPI = (() => {
           endTime:   null,
           location:  location,
           color:     color,
-          allDay:    true
+          allDay:    true,
+          multiDayState: multiDayState
         });
         current.setDate(current.getDate() + 1);
       }
@@ -138,7 +144,8 @@ const GoogleCalendarAPI = (() => {
         endTime:   '23:59',
         location:  location,
         color:     color,
-        allDay:    false
+        allDay:    false,
+        multiDayState: 'start'
       });
       events.push({
         id:        `g-${gEvent.id}-${endDateStr}`,
@@ -148,7 +155,8 @@ const GoogleCalendarAPI = (() => {
         endTime:   _formatTime(endDT),
         location:  location,
         color:     color,
-        allDay:    false
+        allDay:    false,
+        multiDayState: 'end'
       });
       return events;
     }
@@ -161,7 +169,8 @@ const GoogleCalendarAPI = (() => {
       endTime:   _formatTime(endDT),
       location:  location,
       color:     color,
-      allDay:    false
+      allDay:    false,
+      multiDayState: 'single'
     }];
   }
 
@@ -172,10 +181,8 @@ const GoogleCalendarAPI = (() => {
     if (colorId && COLOR_MAP[colorId]) {
       return COLOR_MAP[colorId];
     }
-    // colorId가 없으면 순환 배정
-    const color = DEFAULT_COLORS[_colorIndex % DEFAULT_COLORS.length];
-    _colorIndex++;
-    return color;
+    // 사용자가 구글 캘린더에서 지정하지 않은 기본 색상
+    return 'default';
   }
 
   /**

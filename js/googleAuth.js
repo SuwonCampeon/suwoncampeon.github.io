@@ -75,8 +75,9 @@ const GoogleAuth = (() => {
 
   /**
    * 로그아웃 처리
+   * @param {boolean} isManual - 사용자가 직접 로그아웃 버튼을 눌렀는지 여부
    */
-  function signOut() {
+  function signOut(isManual = true) {
     if (_accessToken) {
       google.accounts.oauth2.revoke(_accessToken, () => {
         console.log('[GoogleAuth] 토큰이 폐기되었습니다.');
@@ -89,9 +90,12 @@ const GoogleAuth = (() => {
 
     localStorage.removeItem('g_token');
     localStorage.removeItem('g_expires');
-    localStorage.removeItem('g_email');
+    
+    if (isManual) {
+      localStorage.removeItem('g_email');
+    }
 
-    if (_onSignOut) _onSignOut();
+    if (_onSignOut) _onSignOut(isManual);
   }
 
   /**
