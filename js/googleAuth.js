@@ -28,6 +28,22 @@ const GoogleAuth = (() => {
     _onSignIn  = onSignIn;
     _onSignOut = onSignOut;
 
+    // 초기화 시 로컬 스토리지에서 유효한 토큰 확인
+    const savedToken = localStorage.getItem('g_token');
+    const savedExpires = localStorage.getItem('g_expires');
+    const savedEmail = localStorage.getItem('g_email');
+
+    if (savedToken && savedExpires && Date.now() < parseInt(savedExpires, 10)) {
+      _accessToken = savedToken;
+      _expiresAt = parseInt(savedExpires, 10);
+      _userEmail = savedEmail || null;
+      
+      // 메인 앱 초기화가 끝난 직후에 로그인 콜백이 실행되도록 지연
+      setTimeout(() => {
+        if (_onSignIn) _onSignIn(_accessToken, _userEmail);
+      }, 50);
+    }
+
     // GIS 라이브러리 로드 대기
     _waitForGIS(() => {
       _tokenClient = google.accounts.oauth2.initTokenClient({
@@ -70,6 +86,10 @@ const GoogleAuth = (() => {
     _accessToken = null;
     _expiresAt   = 0;
     _userEmail   = null;
+
+    localStorage.removeItem('g_token');
+    localStorage.removeItem('g_expires');
+    localStorage.removeItem('g_email');
 
     if (_onSignOut) _onSignOut();
   }
@@ -172,6 +192,7 @@ const GoogleAuth = (() => {
     // 사용자 이메일 가져오기
     _fetchUserEmail(_accessToken).then(email => {
       _userEmail = email;
+      if (email) localStorage.setItem('g_email', email);
       if (_onSignIn) _onSignIn(_accessToken, _userEmail);
     });
   }
@@ -184,6 +205,9 @@ const GoogleAuth = (() => {
     // expires_in은 초 단위 → ms로 변환, 1분 마진
     const expiresInMs = (response.expires_in - 60) * 1000;
     _expiresAt = Date.now() + expiresInMs;
+
+    localStorage.setItem('g_token', _accessToken);
+    localStorage.setItem('g_expires', _expiresAt.toString());
   }
 
   /**
