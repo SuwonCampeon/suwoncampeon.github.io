@@ -107,6 +107,14 @@ const GoogleAuth = (() => {
   }
 
   /**
+   * 토큰 클라이언트가 초기화되었는지 반환한다.
+   * @returns {boolean}
+   */
+  function isClientReady() {
+    return !!_tokenClient;
+  }
+
+  /**
    * 현재 유효한 Access Token을 반환한다.
    * @returns {string|null}
    */
@@ -248,7 +256,8 @@ const GoogleAuth = (() => {
     isSignedIn,
     getAccessToken,
     getUserEmail,
-    ensureValidToken
+    ensureValidToken,
+    isClientReady
   };
 
 })();

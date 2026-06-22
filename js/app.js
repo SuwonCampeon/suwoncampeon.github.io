@@ -9,6 +9,7 @@ const App = (() => {
 
   // ── 모션 모드 상태 ('cube' | 'door') ──
   let _motionMode = 'cube';
+  let _themeMode = 'vintage';
 
   // ── Google OAuth Client ID ──
   const GOOGLE_CLIENT_ID = '335180485291-dujcjg64kdftu5uo04nheqflsg0jus01.apps.googleusercontent.com';
@@ -62,10 +63,21 @@ const App = (() => {
       _onMonthChanged();
     });
 
+    // 초기 테마 로드
+    const savedTheme = localStorage.getItem('app_theme') || 'vintage';
+    _setThemeMode(savedTheme);
+
     // ── 모션 토글 버튼 ──
-    document.querySelectorAll('.motion-btn').forEach(btn => {
+    document.querySelectorAll('.motion-btn:not(.theme-btn)').forEach(btn => {
       btn.addEventListener('click', () => {
         _setMotionMode(btn.dataset.motion);
+      });
+    });
+
+    // ── 테마 토글 버튼 ──
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _setThemeMode(btn.dataset.theme);
       });
     });
 
@@ -117,6 +129,34 @@ const App = (() => {
       btnLogout.addEventListener('click', () => {
         GoogleAuth.signOut(true);
       });
+    }
+
+    // 자동 로그인 설정
+    const autoLoginCheckbox = document.getElementById('auto-login-checkbox');
+    if (autoLoginCheckbox) {
+      // 초기 상태 로드
+      const isAutoLogin = localStorage.getItem('g_autologin') === 'true';
+      autoLoginCheckbox.checked = isAutoLogin;
+
+      // 상태 변경 시 저장
+      autoLoginCheckbox.addEventListener('change', (e) => {
+        localStorage.setItem('g_autologin', e.target.checked);
+      });
+
+      // 앱 켰을 때 자동 로그인이 체크되어 있고 로그아웃 상태라면 로그인 시도
+      if (isAutoLogin) {
+        const tryAutoLogin = () => {
+          if (GoogleAuth.isSignedIn()) return;
+          if (!GoogleAuth.isClientReady()) {
+            setTimeout(tryAutoLogin, 200);
+            return;
+          }
+          console.log('[App] 자동 로그인 활성화됨 - 로그인을 시도합니다.');
+          GoogleAuth.signIn();
+        };
+        // 초기 토큰 확인을 위해 약간의 지연 후 실행
+        setTimeout(tryAutoLogin, 100);
+      }
     }
   }
 
@@ -239,13 +279,16 @@ const App = (() => {
     const btnLogin  = document.getElementById('btn-google-login');
     const userInfo  = document.getElementById('google-user-info');
     const emailEl   = document.getElementById('google-user-email');
+    const autoLoginWrap = document.getElementById('auto-login-wrapper');
 
     if (isSignedIn) {
       if (btnLogin)  btnLogin.style.display = 'none';
+      if (autoLoginWrap) autoLoginWrap.style.display = 'none';
       if (userInfo)  userInfo.style.display = 'flex';
       if (emailEl)   emailEl.textContent = email || '로그인 완료';
     } else {
       if (btnLogin)  btnLogin.style.display = 'flex';
+      if (autoLoginWrap) autoLoginWrap.style.display = 'flex';
       if (userInfo)  userInfo.style.display = 'none';
       if (emailEl)   emailEl.textContent = '';
     }
@@ -274,8 +317,25 @@ const App = (() => {
     _motionMode = mode;
 
     // 버튼 상태 동기화
-    document.querySelectorAll('.motion-btn').forEach(btn => {
+    document.querySelectorAll('.motion-btn:not(.theme-btn)').forEach(btn => {
       const isActive = btn.dataset.motion === mode;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  /**
+   * 테마 모드를 변경한다.
+   * @param {string} mode - 'vintage' | 'pctel'
+   */
+  function _setThemeMode(mode) {
+    _themeMode = mode;
+    localStorage.setItem('app_theme', mode);
+    document.documentElement.setAttribute('data-theme', mode);
+
+    // 버튼 상태 동기화
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      const isActive = btn.dataset.theme === mode;
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });

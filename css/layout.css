@@ -506,3 +506,92 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+
+/* ============================================
+   PC통신 테마 (VT100 감성) 오버라이드
+   ============================================ */
+[data-theme="pctel"] body {
+  background-image: none;
+}
+
+[data-theme="pctel"] .app-shell {
+  border-left: 2px solid var(--text-light);
+  border-right: 2px solid var(--text-light);
+  box-shadow: none;
+}
+[data-theme="pctel"] .app-shell::before,
+[data-theme="pctel"] .app-shell::after {
+  display: none;
+}
+
+[data-theme="pctel"] .app-header {
+  background: var(--leather-dark);
+  border-bottom: 2px solid var(--text-light);
+  box-shadow: none;
+}
+
+[data-theme="pctel"] .app-header__year,
+[data-theme="pctel"] .app-header__month {
+  text-shadow: none;
+}
+
+[data-theme="pctel"] .app-header__btn {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: 0;
+  text-shadow: none;
+}
+
+[data-theme="pctel"] .app-header__today-btn {
+  background: transparent;
+  border-color: var(--text-light);
+  box-shadow: none;
+  color: var(--text-light);
+  text-shadow: none;
+}
+[data-theme="pctel"] .app-header__today-btn:active {
+  background: var(--text-light);
+  color: var(--leather-dark);
+}
+
+[data-theme="pctel"] .settings-menu {
+  background-image: none;
+  background-color: var(--leather-dark);
+  border: 1px solid var(--text-light);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="pctel"] .google-login-btn,
+[data-theme="pctel"] .google-logout-btn {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  box-shadow: none;
+  border-radius: 0;
+}
+
+[data-theme="pctel"] .motion-btn {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  box-shadow: none;
+  border-radius: 0;
+}
+[data-theme="pctel"] .motion-btn.active {
+  background: var(--text-light);
+  color: var(--leather-dark);
+}
+
+[data-theme="pctel"] .app-content {
+  background: var(--leather-dark);
+}
+
+[data-theme="pctel"] .schedule-section {
+  background: var(--leather-dark);
+  border-top: 1px solid var(--text-light);
+}
+
+[data-theme="pctel"] .schedule-section__title {
+  border-bottom: 1px solid var(--text-light);
+}

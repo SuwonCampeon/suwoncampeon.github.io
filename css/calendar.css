@@ -391,12 +391,15 @@
 .event-empty__text { font-size: var(--font-size-sm); font-family: var(--font-family); font-style: italic; }
 
 /* 색상별 좌측 바 */
-.event-card--blue    { border-left-color: var(--event-color-blue); }
-.event-card--green   { border-left-color: var(--event-color-green); }
-.event-card--orange  { border-left-color: var(--event-color-orange); }
-.event-card--pink    { border-left-color: var(--event-color-pink); }
-.event-card--purple  { border-left-color: var(--event-color-purple); }
-.event-card--teal    { border-left-color: var(--event-color-teal); }
+.event-card--blue    { --current-event-color: var(--event-color-blue); border-left-color: var(--current-event-color); }
+.event-card--green   { --current-event-color: var(--event-color-green); border-left-color: var(--current-event-color); }
+.event-card--orange  { --current-event-color: var(--event-color-orange); border-left-color: var(--current-event-color); }
+.event-card--pink    { --current-event-color: var(--event-color-pink); border-left-color: var(--current-event-color); }
+.event-card--purple  { --current-event-color: var(--event-color-purple); border-left-color: var(--current-event-color); }
+.event-card--teal    { --current-event-color: var(--event-color-teal); border-left-color: var(--current-event-color); }
+.event-card--red     { --current-event-color: var(--event-color-red); border-left-color: var(--current-event-color); }
+.event-card--gray    { --current-event-color: var(--event-color-gray); border-left-color: var(--current-event-color); }
+.event-card--default { --current-event-color: var(--event-color-default); border-left-color: var(--current-event-color); }
 
 
 /* ================================================================
@@ -512,4 +515,150 @@
 @keyframes doorInRight {
   0%   { opacity: 0; transform: perspective(600px) rotateY(-110deg); }
   100% { opacity: 1; transform: perspective(600px) rotateY(0deg); }
+}
+
+/* ============================================
+   PC통신 테마 (VT100 감성) 오버라이드
+   ============================================ */
+[data-theme="pctel"] .weekday-row {
+  background: var(--leather-dark);
+  border-bottom: 1px solid var(--text-light);
+  box-shadow: none;
+}
+[data-theme="pctel"] .weekday-row__cell {
+  text-shadow: none;
+}
+
+[data-theme="pctel"] .date-grid {
+  background: var(--leather-dark);
+  border-bottom: none;
+  gap: 1px; 
+}
+[data-theme="pctel"] .date-cell {
+  background: var(--leather-dark);
+  border: 1px solid hsla(180, 100%, 50%, 0.3); /* 연한 그리드 */
+}
+[data-theme="pctel"] .date-cell:active {
+  background: var(--text-light);
+  box-shadow: none;
+}
+[data-theme="pctel"] .date-cell:active .date-cell__number {
+  color: var(--leather-dark);
+}
+
+[data-theme="pctel"] .date-cell__number {
+  text-shadow: none;
+}
+
+[data-theme="pctel"] .date-cell--today .date-cell__number {
+  background: var(--text-light);
+  color: var(--leather-dark);
+  box-shadow: none;
+  border-radius: 0;
+}
+[data-theme="pctel"] .date-cell--selected {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+[data-theme="pctel"] .date-cell--selected .date-cell__number {
+  border: 1px dashed var(--text-light);
+  border-radius: 0;
+}
+[data-theme="pctel"] .date-cell--today.date-cell--selected .date-cell__number {
+  background: var(--text-light);
+  color: var(--leather-dark);
+  box-shadow: none;
+  border-radius: 0;
+  border: 1px dashed var(--leather-dark);
+}
+
+[data-theme="pctel"] .event-card {
+  background: var(--leather-dark);
+  border: 1px solid var(--current-event-color, var(--text-light));
+  border-radius: 0;
+  box-shadow: none;
+}
+[data-theme="pctel"] .event-card:active {
+  transform: none;
+  box-shadow: none;
+  background: var(--current-event-color, var(--text-light));
+}
+[data-theme="pctel"] .event-card:active .event-card__title,
+[data-theme="pctel"] .event-card:active .event-card__time-start,
+[data-theme="pctel"] .event-card:active .event-card__time-end,
+[data-theme="pctel"] .event-card:active .event-card__location {
+  color: var(--leather-dark);
+}
+
+[data-theme="pctel"] .event-card__time {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border-right: 1px dashed var(--current-event-color, var(--text-light));
+}
+
+[data-theme="pctel"] .event-card__title,
+[data-theme="pctel"] .event-card__time-start,
+[data-theme="pctel"] .event-card__time-end,
+[data-theme="pctel"] .event-card__location {
+  text-shadow: none;
+  color: var(--current-event-color, var(--text-light));
+}
+
+/* 각종 아날로그 인디케이터 무효화 및 대체 -> 선으로 통일 */
+[data-theme="pctel"] .date-cell__highlighters {
+  position: static !important;
+  width: 100% !important;
+  margin-top: 4px;
+}
+[data-theme="pctel"] .indicator-pin,
+[data-theme="pctel"] .indicator-sticker,
+[data-theme="pctel"] .indicator-stamp,
+[data-theme="pctel"] .indicator-hole {
+  display: block !important;
+  position: static !important;
+  width: calc(100% - 4px) !important;
+  height: 5px !important;
+  margin-top: 2px !important;
+  background: var(--ind-color, var(--text-light)) !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  color: transparent !important;
+}
+[data-theme="pctel"] .indicator-pin::after {
+  display: none !important;
+}
+
+[data-theme="pctel"] .highlighter-bar {
+  opacity: 1 !important;
+  border-radius: 0 !important;
+  width: calc(100% - 4px) !important;
+  margin-left: 2px !important;
+  margin-right: 2px !important;
+}
+[data-theme="pctel"] .event-card--allday {
+  background: transparent;
+}
+
+/* ================================================================
+   ── 애니메이션 — 터미널 타이핑 (typewriter)
+   ================================================================ */
+.date-grid--typewriter-out-left,
+.date-grid--typewriter-out-right {
+  display: none !important;
+}
+
+.date-grid--typewriter-in-left .date-cell,
+.date-grid--typewriter-in-right .date-cell {
+  opacity: 0;
+  animation: typeIn 10ms step-end forwards;
+  animation-delay: calc(var(--cell-idx) * 10ms);
+}
+
+@keyframes typeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

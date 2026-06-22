@@ -66,7 +66,7 @@ const CalendarRenderer = (() => {
     const ANIM_MS = 420;
 
     // 애니메이션 클래스 접두어
-    const prefix = mode === 'door' ? 'door' : 'cube';
+    const prefix = mode === 'door' ? 'door' : mode === 'typewriter' ? 'typewriter' : 'cube';
 
     // 새 그리드를 DOM에 삽입 (아직 off-screen 준비)
     newGrid.style.opacity = '0';
@@ -83,7 +83,8 @@ const CalendarRenderer = (() => {
     // ── 타이밍 분기 ──
     // 큐브: in/out 동시에 → delay 0ms (두 면이 붙어 공전하는 효과)
     // 회전문: 새 문이 열리기 시작 타이밍 = 40% 지점
-    const inDelay = mode === 'cube' ? 0 : ANIM_MS * 0.4;
+    // 타이핑: in/out 동시 (구 그리드는 css에서 즉시 숨김)
+    const inDelay = (mode === 'cube' || mode === 'typewriter') ? 0 : ANIM_MS * 0.4;
 
     setTimeout(() => {
       newGrid.style.opacity = '';
@@ -171,7 +172,11 @@ const CalendarRenderer = (() => {
     grid.setAttribute('aria-label', '월간 달력');
 
     const fragment = document.createDocumentFragment();
-    cells.forEach(cell => fragment.appendChild(_createCellElement(cell, eventsMap)));
+    cells.forEach((cell, idx) => {
+      const el = _createCellElement(cell, eventsMap);
+      el.style.setProperty('--cell-idx', idx);
+      fragment.appendChild(el);
+    });
     grid.appendChild(fragment);
 
     return grid;
@@ -267,6 +272,7 @@ const CalendarRenderer = (() => {
         if ((state === 'single' || state === 'start') && analogCount < 2) {
           const type = _categorizeEventByColor(evt.color);
           const indicator = document.createElement('div');
+          indicator.style.setProperty('--ind-color', `var(--event-color-${evt.color})`);
           
           if (type === 'pin') {
             indicator.className = `indicator-pin`;

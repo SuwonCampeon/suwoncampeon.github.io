@@ -99,3 +99,70 @@
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ============================================
+   PC통신 테마 (VT100 감성)
+   ============================================ */
+[data-theme="pctel"] {
+  /* ── 배경 (파랑) ── */
+  --leather-dark:       #000080;
+  --leather-mid:        #000080;
+  --leather-light:      #0000A0;
+  --leather-highlight:  #000080;
+  --leather-stitch:     transparent;
+
+  /* ── 헤더 (파랑) ── */
+  --green-dark:         #000080;
+  --green-mid:          #000080;
+  --green-light:        #000080;
+  --green-shine:        #000080;
+  --green-linen-1:      #000080;
+  --green-linen-2:      #000080;
+
+  /* ── 달력 영역 (파랑 배경) ── */
+  --paper-warm:         #0000A0;
+  --paper-cream:        #0000A0;
+  --paper-aged:         #000080;
+  --paper-darker:       #000080;
+  --paper-line:         #0000A0; /* 노트 줄무늬 숨김(같은 색) */
+  --paper-shadow:       #000080;
+
+  /* ── 텍스트 ── */
+  --text-dark:          #FFFFFF; /* 흰색 글자 */
+  --text-mid:           #FFFF00; /* 노란색 */
+  --text-light:         #00FFFF; /* 하늘색 */
+  --text-on-green:      #FFFFFF;
+  --text-emboss-light:  transparent;
+  --text-emboss-dark:   transparent;
+
+  /* ── 일정 색상 매핑 ── */
+  --event-color-red:    #FF0000; /* 빨강 -> 빨강 */
+  --event-color-orange: #FFFF00; /* 오렌지/노랑 -> 노랑 */
+  --event-color-green:  #00FF00; /* 초록 -> 초록 */
+  --event-color-blue:   #00FF00; /* 파랑 -> 초록 (요청: 초록이나 파랑 계열이면 초록) */
+  --event-color-teal:   #00FFFF; /* 하늘색 -> 하늘색(Cyan) */
+  --event-color-purple: #FF00FF; /* 보라 -> 핑크(Magenta) */
+  --event-color-pink:   #FF00FF; /* 핑크 -> 핑크 */
+  --event-color-gray:   #FFFFFF; /* 회색 -> 흰색 */
+  --event-color-default:#FFFFFF; /* 기본 -> 흰색 */
+
+  /* ── 강조 색상 ── */
+  --accent-red:         #FF0000;
+  --accent-red-light:   #FF0000;
+  --accent-red-dark:    #FF0000;
+
+  /* ── 폰트 오버라이드 ── */
+  --font-family:        'DungGeunMo', monospace;
+  --font-family-ui:     'DungGeunMo', monospace;
+
+  /* ── 그림자/반사 효과 무효화 ── */
+  --shadow-inset:    none;
+  --shadow-raised:   none;
+  --shadow-elevated: none;
+  --shadow-button:   none;
+  
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-full: 0px; /* 모든 걸 각지게 */
+}

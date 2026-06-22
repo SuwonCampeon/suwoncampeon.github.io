@@ -14,6 +14,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- PC통신 테마용 폰트 -->
+  <style>
+    @font-face {
+      font-family: 'DungGeunMo';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+  </style>
+
   <!-- PWA Manifest & App Icon -->
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
@@ -54,10 +64,18 @@
     <div class="settings-menu" id="settings-menu" aria-hidden="true">
       <ul class="settings-menu__list">
         <li class="settings-menu__item">
+          <span class="settings-menu__label">테마</span>
+          <div class="motion-toggle">
+            <button class="motion-btn theme-btn active" id="btn-theme-vintage" data-theme="vintage" aria-pressed="true">빈티지</button>
+            <button class="motion-btn theme-btn"        id="btn-theme-pctel"   data-theme="pctel" aria-pressed="false">PC통신</button>
+          </div>
+        </li>
+        <li class="settings-menu__item">
           <span class="settings-menu__label">전환 효과</span>
           <div class="motion-toggle">
             <button class="motion-btn active" id="btn-motion-cube"  data-motion="cube" aria-pressed="true">큐브 회전</button>
             <button class="motion-btn"        id="btn-motion-door"  data-motion="door" aria-pressed="false">회전문</button>
+            <button class="motion-btn"        id="btn-motion-typewriter" data-motion="typewriter" aria-pressed="false">터미널</button>
           </div>
         </li>
         <li class="settings-menu__item settings-menu__google-auth">
@@ -72,6 +90,12 @@
             </svg>
             <span>Google 계정 로그인</span>
           </button>
+          <div class="auto-login-wrapper" id="auto-login-wrapper" style="margin-top: 10px; display: flex; justify-content: flex-end;">
+            <label for="auto-login-checkbox" style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-secondary);">
+              <input type="checkbox" id="auto-login-checkbox" style="accent-color: var(--primary-color); width: 14px; height: 14px; cursor: pointer;">
+              <span>자동 로그인</span>
+            </label>
+          </div>
           <!-- 로그인 후 (기본 숨김) -->
           <div class="google-user-info" id="google-user-info" style="display: none;">
             <span class="google-user-info__email" id="google-user-email"></span>
