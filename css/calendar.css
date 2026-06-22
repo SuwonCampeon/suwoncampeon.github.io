@@ -1,0 +1,411 @@
+/* ============================================
+   calendar.css — 빈티지 노트 스큐어모피즘 캘린더
+   노란 종이 그리드 + 큐브 / 회전문 애니메이션
+   ============================================ */
+
+/* ── 요일 행 ── */
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: var(--spacing-sm) var(--spacing-xl);
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--paper-aged)   0%,
+      var(--paper-darker) 100%
+    );
+  border-bottom: 1px solid var(--paper-shadow);
+  box-shadow: 0 1px 3px hsla(0, 0%, 0%, 0.1);
+}
+
+.weekday-row__cell {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family);
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.6);
+}
+
+.weekday-row__cell--sunday  { color: var(--accent-red); }
+.weekday-row__cell--saturday { color: var(--event-color-blue); }
+
+/* ── 달력 그리드 래퍼 (3D 컨텍스트) ── */
+.calendar-viewport {
+  /* translateZ 미사용 → Z 이동 없음 → perspective zoom 없음
+     800px은 rotateY 3D 스큐 연출용, 크기 변화와 무관 */
+  perspective: 800px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;  /* 상하단 침범 차단 */
+  position: relative;
+}
+
+/* ── 날짜 그리드 ── */
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  gap: 2px;
+  background: var(--paper-cream);
+  border-bottom: 1px solid var(--paper-shadow);
+
+  /* 3D 변환을 위한 기본 설정 */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* ── 날짜 셀 ── */
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  min-height: 52px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  position: relative;
+}
+
+.date-cell:active {
+  background: var(--paper-aged);
+  box-shadow: inset 0 1px 3px hsla(0, 0%, 0%, 0.1);
+}
+
+/* 날짜 숫자 */
+.date-cell__number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  color: var(--text-dark);
+  text-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.5);
+  transition: all var(--transition-fast);
+}
+
+/* 이번 달이 아닌 날짜 */
+.date-cell--other-month .date-cell__number {
+  color: var(--paper-shadow);
+  opacity: 0.5;
+}
+
+/* 오늘 날짜 — 빨간 가죽 원형 배지 */
+.date-cell--today .date-cell__number {
+  color: #fff;
+  font-weight: var(--font-weight-bold);
+  text-shadow: 0 -1px 0 hsla(0, 0%, 0%, 0.3);
+  background:
+    radial-gradient(
+      circle at 38% 32%,
+      var(--accent-red-light) 0%,
+      var(--accent-red)       50%,
+      var(--accent-red-dark) 100%
+    );
+  box-shadow:
+    0 2px 5px hsla(4, 65%, 28%, 0.45),
+    inset 0 1px 0 hsla(0, 0%, 100%, 0.25),
+    inset 0 -1px 2px hsla(0, 0%, 0%, 0.2);
+}
+
+/* 선택된 날짜 */
+.date-cell--selected {
+  background: var(--paper-aged);
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 1px 3px hsla(0, 0%, 0%, 0.1);
+}
+
+.date-cell--selected .date-cell__number {
+  color: var(--text-dark);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid var(--text-mid);
+}
+
+/* 오늘 + 선택 */
+.date-cell--today.date-cell--selected .date-cell__number {
+  background:
+    radial-gradient(
+      circle at 38% 32%,
+      var(--accent-red-light) 0%,
+      var(--accent-red)       50%,
+      var(--accent-red-dark) 100%
+    );
+  color: #fff;
+  border: none;
+  box-shadow:
+    0 2px 6px hsla(4, 65%, 28%, 0.5),
+    inset 0 1px 0 hsla(0, 0%, 100%, 0.25);
+}
+
+/* 일요일 / 토요일 */
+.date-cell--sunday .date-cell__number  { color: var(--accent-red); }
+.date-cell--saturday .date-cell__number { color: var(--event-color-blue); }
+.date-cell--today.date-cell--sunday .date-cell__number,
+.date-cell--today.date-cell--saturday .date-cell__number { color: #fff; }
+
+/* 일정 도트 */
+.date-cell__dots {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+  min-height: 5px;
+}
+
+.date-cell__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  box-shadow:
+    inset 0 -1px 1px hsla(0, 0%, 0%, 0.2),
+    0 0.5px 0 hsla(0, 0%, 100%, 0.3);
+}
+
+/* ── 일정 카드 ── */
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.event-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--paper-shadow);
+  border-left: 4px solid var(--event-color-blue);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--paper-warm)  0%,
+      var(--paper-cream) 100%
+    );
+  box-shadow:
+    0 2px 5px hsla(24, 30%, 0%, 0.12),
+    0 1px 2px hsla(0, 0%, 0%, 0.08),
+    inset 0 1px 0 hsla(0, 0%, 100%, 0.75);
+}
+
+.event-card:active {
+  transform: scale(0.98);
+  box-shadow:
+    0 1px 2px hsla(0, 0%, 0%, 0.12),
+    inset 0 1px 3px hsla(0, 0%, 0%, 0.06);
+}
+
+.event-card__time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+  flex-shrink: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--paper-aged);
+  box-shadow: inset 0 1px 2px hsla(0, 0%, 0%, 0.08);
+}
+
+.event-card__time-start {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family);
+  color: var(--text-dark);
+}
+
+.event-card__time-end {
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
+  font-family: var(--font-family);
+}
+
+.event-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-card__title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family);
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.5);
+}
+
+.event-card__location {
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-style: italic;
+}
+
+.event-card__location::before {
+  content: '📍';
+  font-size: 10px;
+  font-style: normal;
+}
+
+.event-card--allday {
+  background:
+    linear-gradient(
+      135deg,
+      hsla(48, 70%, 88%, 0.6) 0%,
+      var(--paper-cream) 100%
+    );
+}
+
+.event-card--allday .event-card__time-start {
+  font-size: var(--font-size-xs);
+  color: var(--text-mid);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-ui);
+}
+
+.event-empty {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  color: var(--text-light);
+}
+
+.event-empty__icon { font-size: 2.5rem; margin-bottom: var(--spacing-sm); opacity: 0.4; }
+.event-empty__text { font-size: var(--font-size-sm); font-family: var(--font-family); font-style: italic; }
+
+/* 색상별 좌측 바 */
+.event-card--blue    { border-left-color: var(--event-color-blue); }
+.event-card--green   { border-left-color: var(--event-color-green); }
+.event-card--orange  { border-left-color: var(--event-color-orange); }
+.event-card--pink    { border-left-color: var(--event-color-pink); }
+.event-card--purple  { border-left-color: var(--event-color-purple); }
+.event-card--teal    { border-left-color: var(--event-color-teal); }
+
+
+/* ================================================================
+   ── 3D 애니메이션 — 큐브 회전 (cube)
+
+   translateX(sin θ × 160px) + rotateY(θ) 조합
+   ✔ Z 변화 없음 → perspective zoom 제로
+   ✔ 상하단 침범 없음 (컨텐츠 크기 불변)
+   ✔ X가 sin 곡선을 따르므로 공전 궤도 구현
+   ✔ rotateY로 면이 3D로 기울어지는 시각 유지
+
+   sin 값 (반지름 160px 기준):
+   0°→0  15°→41  30°→80  45°→113  60°→138  75°→155  90°→160
+   ================================================================ */
+
+/* 다음 달 (왼쪽으로 진행) */
+.date-grid--cube-out-left {
+  transform-origin: center center;
+  animation: cubeOutLeft 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.date-grid--cube-in-left {
+  transform-origin: center center;
+  animation: cubeInLeft  420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 이전 달 (오른쪽으로 진행) */
+.date-grid--cube-out-right {
+  transform-origin: center center;
+  animation: cubeOutRight 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.date-grid--cube-in-right {
+  transform-origin: center center;
+  animation: cubeInRight  420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 현재 면 → 왼쪽으로 공전 퇴장 */
+@keyframes cubeOutLeft {
+  0%    { transform: translateX(   0px) rotateY(  0deg); }
+  16.7% { transform: translateX( -41px) rotateY(-15deg); }
+  33.3% { transform: translateX( -80px) rotateY(-30deg); }
+  50%   { transform: translateX(-113px) rotateY(-45deg); }
+  66.7% { transform: translateX(-138px) rotateY(-60deg); }
+  83.3% { transform: translateX(-155px) rotateY(-75deg); }
+  100%  { transform: translateX(-160px) rotateY(-90deg); }
+}
+/* 새 면 → 오른쪽에서 공전 진입 */
+@keyframes cubeInLeft {
+  0%    { transform: translateX( 160px) rotateY( 90deg); }
+  16.7% { transform: translateX( 155px) rotateY( 75deg); }
+  33.3% { transform: translateX( 138px) rotateY( 60deg); }
+  50%   { transform: translateX( 113px) rotateY( 45deg); }
+  66.7% { transform: translateX(  80px) rotateY( 30deg); }
+  83.3% { transform: translateX(  41px) rotateY( 15deg); }
+  100%  { transform: translateX(   0px) rotateY(  0deg); }
+}
+
+/* 현재 면 → 오른쪽으로 공전 퇴장 */
+@keyframes cubeOutRight {
+  0%    { transform: translateX(   0px) rotateY(  0deg); }
+  16.7% { transform: translateX(  41px) rotateY( 15deg); }
+  33.3% { transform: translateX(  80px) rotateY( 30deg); }
+  50%   { transform: translateX( 113px) rotateY( 45deg); }
+  66.7% { transform: translateX( 138px) rotateY( 60deg); }
+  83.3% { transform: translateX( 155px) rotateY( 75deg); }
+  100%  { transform: translateX( 160px) rotateY( 90deg); }
+}
+/* 새 면 → 왼쪽에서 공전 진입 */
+@keyframes cubeInRight {
+  0%    { transform: translateX(-160px) rotateY(-90deg); }
+  16.7% { transform: translateX(-155px) rotateY(-75deg); }
+  33.3% { transform: translateX(-138px) rotateY(-60deg); }
+  50%   { transform: translateX(-113px) rotateY(-45deg); }
+  66.7% { transform: translateX( -80px) rotateY(-30deg); }
+  83.3% { transform: translateX( -41px) rotateY(-15deg); }
+  100%  { transform: translateX(   0px) rotateY(  0deg); }
+}
+
+
+/* ================================================================
+   ── 3D 애니메이션 — 회전문 (revolving-door)
+   수직 중앙축을 기준으로 문이 열리듯 반 접히며 회전
+   ================================================================ */
+
+.date-grid--door-out-left {
+  transform-origin: left center;
+  animation: doorOutLeft 300ms ease-in forwards;
+}
+.date-grid--door-in-left {
+  transform-origin: left center;
+  animation: doorInLeft 300ms ease-out forwards;
+}
+.date-grid--door-out-right {
+  transform-origin: right center;
+  animation: doorOutRight 300ms ease-in forwards;
+}
+.date-grid--door-in-right {
+  transform-origin: right center;
+  animation: doorInRight 300ms ease-out forwards;
+}
+
+@keyframes doorOutLeft {
+  0%   { opacity: 1; transform: perspective(600px) rotateY(0deg); }
+  100% { opacity: 0; transform: perspective(600px) rotateY(-110deg); }
+}
+@keyframes doorInLeft {
+  0%   { opacity: 0; transform: perspective(600px) rotateY(110deg); }
+  100% { opacity: 1; transform: perspective(600px) rotateY(0deg); }
+}
+@keyframes doorOutRight {
+  0%   { opacity: 1; transform: perspective(600px) rotateY(0deg); }
+  100% { opacity: 0; transform: perspective(600px) rotateY(110deg); }
+}
+@keyframes doorInRight {
+  0%   { opacity: 0; transform: perspective(600px) rotateY(-110deg); }
+  100% { opacity: 1; transform: perspective(600px) rotateY(0deg); }
+}
