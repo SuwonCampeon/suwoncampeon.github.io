@@ -280,6 +280,24 @@ const DataManager = (() => {
     return eventsMap;
   }
 
+  function addEvent(event) {
+    _events.push(event);
+    _saveCache();
+  }
+
+  function updateEvent(eventId, updatedEvent) {
+    const idx = _events.findIndex(e => e.id === eventId);
+    if (idx !== -1) {
+      _events[idx] = updatedEvent;
+      _saveCache();
+    }
+  }
+
+  function removeEvent(eventId) {
+    _events = _events.filter(e => e.id !== eventId);
+    _saveCache();
+  }
+
   // Public API
   return {
     getAllEvents,
@@ -289,7 +307,10 @@ const DataManager = (() => {
     appendEvents,
     clearEvents,
     resetToMock,
-    getSource
+    getSource,
+    addEvent,
+    updateEvent,
+    removeEvent
   };
 
 })();

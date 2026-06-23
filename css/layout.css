@@ -595,3 +595,353 @@ body {
 [data-theme="pctel"] .schedule-section__title {
   border-bottom: 1px solid var(--text-light);
 }
+
+/* ============================================
+   추가/편집 모달 및 FAB 스타일
+   ============================================ */
+
+/* ── FAB (Floating Action Button) ── */
+.fab {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + var(--spacing-xl));
+  right: var(--spacing-xl);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-red-dark);
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent-red-light) 0%,
+      var(--accent-red)       50%,
+      var(--accent-red-dark)  100%
+    );
+  color: #fff;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 10px hsla(0, 0%, 0%, 0.4),
+    inset 0 2px 4px hsla(0, 0%, 100%, 0.3);
+  cursor: pointer;
+  z-index: 90;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.fab:active {
+  transform: scale(0.95);
+  box-shadow:
+    0 2px 5px hsla(0, 0%, 0%, 0.4),
+    inset 0 2px 4px hsla(0, 0%, 0%, 0.3);
+}
+
+/* ── Modal Overlay ── */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: hsla(0, 0%, 0%, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.modal-overlay[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Modal Window ── */
+.event-modal {
+  width: 90%;
+  max-width: 400px;
+  background: var(--paper-cream);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.5);
+  transform: scale(0.95) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.modal-overlay[aria-hidden="false"] .event-modal {
+  transform: scale(1) translateY(0);
+}
+
+.event-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 2px solid var(--paper-shadow);
+  background: var(--paper-aged);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.event-modal__title {
+  font-size: var(--font-size-lg);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-dark);
+}
+
+.event-modal__close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.event-modal__body {
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-mid);
+}
+
+.form-input {
+  padding: 10px;
+  border: 1px solid var(--paper-shadow);
+  border-radius: var(--radius-sm);
+  background: var(--paper-warm);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  color: var(--text-dark);
+  outline: none;
+}
+.form-input:focus {
+  border-color: var(--accent-red);
+}
+
+.form-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent-red);
+}
+
+.event-modal__footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: 1px solid var(--paper-shadow);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  background: var(--paper-aged);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-ui);
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--event-color-blue);
+  color: white;
+}
+
+.btn--danger {
+  background: var(--accent-red);
+  color: white;
+  margin-right: auto; /* Push to left */
+}
+
+/* ── Color Picker ── */
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.2s;
+}
+
+.color-swatch.selected {
+  transform: scale(1.2);
+  border-color: var(--text-dark);
+}
+
+/* ── Time Pickers ── */
+.time-picker-container {
+  background: var(--paper-darker);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  border: 1px solid inset hsla(0, 0%, 0%, 0.1);
+}
+
+/* Tumbler (Vintage) */
+.tumbler-time-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.tumbler-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--paper-aged);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 2px 4px hsla(0, 0%, 0%, 0.2);
+}
+
+.tumbler-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-mid);
+  width: 40px;
+}
+
+.tumbler {
+  width: 40px;
+  height: 60px;
+  background: var(--paper-cream);
+  border: 1px solid var(--paper-shadow);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  touch-action: none; /* For smooth dragging */
+  cursor: grab;
+}
+
+.tumbler:active {
+  cursor: grabbing;
+}
+
+.tumbler::before, .tumbler::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; height: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.tumbler::before {
+  top: 0;
+  background: linear-gradient(180deg, hsla(0,0%,0%,0.3) 0%, transparent 100%);
+}
+
+.tumbler::after {
+  bottom: 0;
+  background: linear-gradient(0deg, hsla(0,0%,0%,0.3) 0%, transparent 100%);
+}
+
+.tumbler-track {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  /* Will be translated in JS */
+}
+
+.tumbler-item {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-ui);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-dark);
+  opacity: 0.3;
+  transition: opacity 0.1s;
+}
+
+.tumbler-item.active {
+  opacity: 1;
+  font-size: 1.1rem;
+}
+
+.digital-time-picker {
+  display: none; /* Default hidden in vintage */
+}
+
+/* PC통신 테마 모달 오버라이드 */
+[data-theme="pctel"] .fab {
+  border-radius: 0;
+  background: var(--leather-dark);
+  border: 2px solid var(--text-light);
+  color: var(--text-light);
+  box-shadow: none;
+}
+[data-theme="pctel"] .event-modal {
+  background: var(--leather-dark);
+  border: 1px solid var(--text-light);
+  border-radius: 0;
+  box-shadow: none;
+}
+[data-theme="pctel"] .event-modal__header,
+[data-theme="pctel"] .event-modal__footer,
+[data-theme="pctel"] .time-picker-container {
+  background: var(--leather-dark);
+  border-color: var(--text-light);
+  border-radius: 0;
+}
+[data-theme="pctel"] .event-modal__title,
+[data-theme="pctel"] .event-modal__close,
+[data-theme="pctel"] .form-label,
+[data-theme="pctel"] .form-input {
+  color: var(--text-light);
+  text-shadow: none;
+}
+[data-theme="pctel"] .form-input {
+  background: transparent;
+  border: 1px dashed var(--text-light);
+  border-radius: 0;
+}
+[data-theme="pctel"] .btn {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  color: var(--text-light);
+  border-radius: 0;
+}
+[data-theme="pctel"] .btn:active {
+  background: var(--text-light);
+  color: var(--leather-dark);
+}
+[data-theme="pctel"] .tumbler-time-picker {
+  display: none; /* Hide tumbler in PCTel */
+}
+[data-theme="pctel"] .digital-time-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}

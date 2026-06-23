@@ -30,6 +30,17 @@ const App = (() => {
     _scheduleTitle = document.getElementById('schedule-title');
     _eventList     = document.getElementById('event-list');
 
+    // ── 이벤트 모달 초기화 ──
+    if (typeof EventModal !== 'undefined') {
+      EventModal.init(_onSaveEvent, _onDeleteEvent);
+    }
+    const btnAdd = document.getElementById('btn-add-event');
+    if (btnAdd) {
+      btnAdd.addEventListener('click', () => {
+        EventModal.open(CalendarRenderer.getSelectedDate());
+      });
+    }
+
     // 캘린더 초기화
     CalendarRenderer.init(elements, (dateStr) => {
       _renderEventList(dateStr, _scheduleTitle, _eventList);
@@ -384,6 +395,18 @@ const App = (() => {
         </div>
       `;
     }).join('');
+
+    // 이벤트 카드 클릭 시 편집 모달 열기
+    listEl.querySelectorAll('.event-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const eventId = card.dataset.id;
+        const events = DataManager.getEventsByDate(dateStr);
+        const evt = events.find(e => e.id === eventId);
+        if (evt && typeof EventModal !== 'undefined') {
+          EventModal.open(dateStr, evt);
+        }
+      });
+    });
   }
 
   /**
@@ -411,6 +434,62 @@ const App = (() => {
         _onMonthChanged();
       }
     }, { passive: true });
+  }
+
+  /**
+   * 일정 저장 콜백
+   */
+  async function _onSaveEvent(eventData, isEdit) {
+    if (GoogleAuth.isSignedIn()) {
+      _showSyncIndicator(true);
+      try {
+        const token = await GoogleAuth.ensureValidToken();
+        if (isEdit) {
+          const updated = await GoogleCalendarAPI.updateEvent(token, eventData.id, eventData);
+          DataManager.updateEvent(eventData.id, updated);
+        } else {
+          const inserted = await GoogleCalendarAPI.insertEvent(token, eventData);
+          DataManager.addEvent(inserted);
+        }
+        _refreshCalendar();
+      } catch (error) {
+        console.error('[App] 일정 저장 실패:', error);
+        alert(`일정 저장에 실패했습니다.\n${error.message}`);
+      } finally {
+        _showSyncIndicator(false);
+      }
+    } else {
+      // 로컬에만 저장
+      if (isEdit) {
+        DataManager.updateEvent(eventData.id, eventData);
+      } else {
+        DataManager.addEvent(eventData);
+      }
+      _refreshCalendar();
+    }
+  }
+
+  /**
+   * 일정 삭제 콜백
+   */
+  async function _onDeleteEvent(eventId) {
+    if (GoogleAuth.isSignedIn()) {
+      _showSyncIndicator(true);
+      try {
+        const token = await GoogleAuth.ensureValidToken();
+        await GoogleCalendarAPI.deleteEvent(token, eventId);
+        DataManager.removeEvent(eventId);
+        _refreshCalendar();
+      } catch (error) {
+        console.error('[App] 일정 삭제 실패:', error);
+        alert(`일정 삭제에 실패했습니다.\n${error.message}`);
+      } finally {
+        _showSyncIndicator(false);
+      }
+    } else {
+      DataManager.removeEvent(eventId);
+      _refreshCalendar();
+    }
   }
 
   return { init };

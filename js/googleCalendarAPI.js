@@ -204,10 +204,142 @@ const GoogleCalendarAPI = (() => {
     return `${h}:${m}`;
   }
 
+  const REVERSE_COLOR_MAP = {
+    'purple': '3',
+    'green': '2',
+    'pink': '4',
+    'orange': '6',
+    'teal': '7',
+    'gray': '8',
+    'blue': '9',
+    'red': '11',
+    'default': null
+  };
+
+  /**
+   * 새 일정을 Google Calendar에 추가한다.
+   * @param {string} accessToken
+   * @param {Object} eventData 앱 내부 이벤트 포맷
+   * @returns {Promise<Object>} 추가된 이벤트를 앱 내부 포맷으로 반환
+   */
+  async function insertEvent(accessToken, eventData) {
+    const url = `${BASE_URL}/calendars/primary/events`;
+    const gEvent = _convertToGEvent(eventData);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(gEvent)
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return _convertEvent(data)[0];
+  }
+
+  /**
+   * 기존 일정을 업데이트한다.
+   * @param {string} accessToken
+   * @param {string} eventId
+   * @param {Object} eventData
+   * @returns {Promise<Object>}
+   */
+  async function updateEvent(accessToken, eventId, eventData) {
+    const realId = eventId.startsWith('g-') ? eventId.split('-')[1] : eventId;
+    const url = `${BASE_URL}/calendars/primary/events/${realId}`;
+    const gEvent = _convertToGEvent(eventData);
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(gEvent)
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    return _convertEvent(data)[0];
+  }
+
+  /**
+   * 일정을 삭제한다.
+   * @param {string} accessToken
+   * @param {string} eventId
+   * @returns {Promise<boolean>}
+   */
+  async function deleteEvent(accessToken, eventId) {
+    const realId = eventId.startsWith('g-') ? eventId.split('-')[1] : eventId;
+    const url = `${BASE_URL}/calendars/primary/events/${realId}`;
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok && response.status !== 204) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+
+    return true;
+  }
+
+  /**
+   * 앱 내부 이벤트 포맷을 Google Calendar API 포맷으로 변환한다.
+   */
+  function _convertToGEvent(eventData) {
+    const gEvent = {
+      summary: eventData.title,
+      location: eventData.location || undefined,
+      start: {},
+      end: {}
+    };
+
+    const colorId = REVERSE_COLOR_MAP[eventData.color];
+    if (colorId) {
+      gEvent.colorId = colorId;
+    }
+
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (eventData.allDay) {
+      gEvent.start.date = eventData.date;
+      
+      const [y, m, d] = eventData.date.split('-').map(Number);
+      const endDate = new Date(y, m - 1, d + 1); // next day
+      gEvent.end.date = _formatDate(endDate);
+    } else {
+      gEvent.start.dateTime = `${eventData.date}T${eventData.startTime}:00`;
+      gEvent.start.timeZone = timeZone;
+      gEvent.end.dateTime = `${eventData.date}T${eventData.endTime}:00`;
+      gEvent.end.timeZone = timeZone;
+    }
+
+    return gEvent;
+  }
+
   // Public API
   return {
     fetchEvents,
-    fetchMonthEvents
+    fetchMonthEvents,
+    insertEvent,
+    updateEvent,
+    deleteEvent
   };
 
 })();
