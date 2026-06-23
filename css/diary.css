@@ -6,20 +6,8 @@
 /* ── 일기장 섹션 ── */
 .diary-section {
   flex: 1;
-  padding: var(--spacing-lg) var(--spacing-xl);
-  padding-bottom: calc(var(--safe-bottom) + 80px);
-
-  /* 노트 줄무늬 배경 */
-  background:
-    repeating-linear-gradient(
-      180deg,
-      transparent,
-      transparent 27px,
-      var(--diary-line-color) 27px,
-      var(--diary-line-color) 28px
-    ),
-    var(--diary-bg);
-  min-height: 100%;
+  padding: var(--spacing-md) 0;
+  padding-bottom: var(--spacing-xl);
 }
 
 .diary-section__header {

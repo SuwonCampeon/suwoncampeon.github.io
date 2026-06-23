@@ -20,141 +20,7 @@
 const DataManager = (() => {
 
   // ── Mock 데이터 (현재 기준 2026년 6월) — 로그인 전 기본 표시용 ──
-  const _mockEvents = [
-    {
-      id: 'evt-001',
-      title: '팀 위클리 미팅',
-      date: '2026-06-22',
-      startTime: '10:00',
-      endTime: '11:00',
-      location: '회의실 A',
-      color: 'blue',
-      allDay: false
-    },
-    {
-      id: 'evt-002',
-      title: '점심 약속',
-      date: '2026-06-22',
-      startTime: '12:30',
-      endTime: '13:30',
-      location: '강남역 근처',
-      color: 'green',
-      allDay: false
-    },
-    {
-      id: 'evt-003',
-      title: '프로젝트 데드라인',
-      date: '2026-06-25',
-      startTime: null,
-      endTime: null,
-      location: null,
-      color: 'red',
-      allDay: true
-    },
-    {
-      id: 'evt-004',
-      title: '디자인 리뷰',
-      date: '2026-06-25',
-      startTime: '14:00',
-      endTime: '15:30',
-      location: '온라인 (Zoom)',
-      color: 'default',
-      allDay: false
-    },
-    {
-      id: 'evt-005',
-      title: '운동',
-      date: '2026-06-23',
-      startTime: '07:00',
-      endTime: '08:00',
-      location: '헬스장',
-      color: 'teal',
-      allDay: false
-    },
-    {
-      id: 'evt-006',
-      title: '치과 예약',
-      date: '2026-06-27',
-      startTime: '16:00',
-      endTime: '17:00',
-      location: '서울치과',
-      color: 'pink',
-      allDay: false
-    },
-    {
-      id: 'evt-007',
-      title: '제주도 워크샵',
-      date: '2026-06-27',
-      startTime: null,
-      endTime: null,
-      location: '제주도',
-      color: 'orange',
-      allDay: true,
-      multiDayState: 'start'
-    },
-    {
-      id: 'evt-008',
-      title: '제주도 워크샵',
-      date: '2026-06-28',
-      startTime: null,
-      endTime: null,
-      location: '제주도',
-      color: 'orange',
-      allDay: true,
-      multiDayState: 'middle'
-    },
-    {
-      id: 'evt-008b',
-      title: '제주도 워크샵',
-      date: '2026-06-29',
-      startTime: null,
-      endTime: null,
-      location: '제주도',
-      color: 'orange',
-      allDay: true,
-      multiDayState: 'end'
-    },
-    {
-      id: 'evt-009',
-      title: '코드 리뷰',
-      date: '2026-06-24',
-      startTime: '11:00',
-      endTime: '12:00',
-      location: null,
-      color: 'blue',
-      allDay: false
-    },
-    {
-      id: 'evt-010',
-      title: '스프린트 회고',
-      date: '2026-06-26',
-      startTime: '15:00',
-      endTime: '16:00',
-      location: '회의실 B',
-      color: 'purple',
-      allDay: false
-    },
-    {
-      id: 'evt-011',
-      title: '월간 보고서 작성',
-      date: '2026-06-30',
-      startTime: '09:00',
-      endTime: '10:00',
-      location: null,
-      color: 'orange',
-      allDay: false
-    },
-    {
-      id: 'evt-012',
-      title: '1:1 미팅',
-      date: '2026-06-22',
-      startTime: '15:00',
-      endTime: '15:30',
-      location: null,
-      color: 'purple',
-      allDay: false
-    }
-  ];
+  const _mockEvents = [];
 
   // ── 캐시 키 ──
   const CACHE_KEY = 'g_cached_events';
@@ -181,12 +47,10 @@ const DataManager = (() => {
    * 로컬 스토리지에 이벤트를 저장한다.
    */
   function _saveCache() {
-    if (_source === 'google') {
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(_events));
-      } catch (e) {
-        console.warn('[DataManager] 일정 캐싱 실패', e);
-      }
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(_events));
+    } catch (e) {
+      console.warn('[DataManager] 일정 캐싱 실패', e);
     }
   }
 
@@ -225,9 +89,7 @@ const DataManager = (() => {
    * Mock 데이터로 복원한다. (로그아웃 시 사용)
    */
   function resetToMock() {
-    _events = [..._mockEvents];
     _source = 'mock';
-    localStorage.removeItem(CACHE_KEY);
   }
 
   /**

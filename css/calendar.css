@@ -360,9 +360,25 @@
 }
 
 .event-card__location::before {
-  content: '📍';
-  font-size: 10px;
-  font-style: normal;
+  content: '📍 ';
+  font-size: 0.85em;
+}
+
+.btn-share-event {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-share-event:hover {
+  color: var(--current-event-color);
+  transform: scale(1.1);
 }
 
 .event-card--allday {
@@ -548,6 +564,7 @@
 
 [data-theme="pctel"] .date-cell__number {
   text-shadow: none;
+  font-size: var(--font-size-lg);
 }
 
 [data-theme="pctel"] .date-cell--today .date-cell__number {
@@ -595,7 +612,9 @@
   background: transparent;
   border-radius: 0;
   box-shadow: none;
-  border-right: 1px dashed var(--current-event-color, var(--text-light));
+  border-right: none;
+  padding-right: 0;
+  margin-right: 10px;
 }
 
 [data-theme="pctel"] .event-card__title,

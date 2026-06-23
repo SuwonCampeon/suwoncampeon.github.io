@@ -123,10 +123,6 @@ const DiaryView = (() => {
       : '';
 
     _section.innerHTML = `
-      <div class="diary-section__header">
-        <h2 class="diary-section__title">📔 일기장</h2>
-        <span class="diary-section__date">${dateLabel}</span>
-      </div>
       <div class="diary-card">
         <div class="diary-card__meta">
           ${moodInfo.emoji ? `<span class="diary-card__mood">
@@ -171,10 +167,6 @@ const DiaryView = (() => {
    */
   function _renderEmpty(dateLabel) {
     _section.innerHTML = `
-      <div class="diary-section__header">
-        <h2 class="diary-section__title">📔 일기장</h2>
-        <span class="diary-section__date">${dateLabel}</span>
-      </div>
       <div class="diary-empty">
         <div class="diary-empty__icon">📝</div>
         <div class="diary-empty__text">아직 일기가 없어요.<br>오늘 하루를 기록해보세요!</div>

@@ -65,6 +65,7 @@
     <!-- ── 설정 드롭다운 메뉴 ── -->
     <div class="settings-menu" id="settings-menu" aria-hidden="true">
       <ul class="settings-menu__list">
+        <!-- 하단 탭 메뉴(이전 위치) 제거됨 -->
         <li class="settings-menu__item">
           <span class="settings-menu__label">테마</span>
           <div class="motion-toggle">
@@ -118,48 +119,53 @@
     <!-- ── 메인 콘텐츠 ── -->
     <main class="app-content">
 
-      <!-- ── 탭 1: 캘린더 (기존) ── -->
-      <div class="tab-view tab-view--active" id="tab-calendar">
+      <!-- 요일 행 -->
+      <div class="weekday-row" id="weekday-row" role="row" aria-label="요일"></div>
 
-        <!-- 요일 행 -->
-        <div class="weekday-row" id="weekday-row" role="row" aria-label="요일"></div>
+      <!-- 날짜 그리드 래퍼 (perspective 컨텍스트) -->
+      <div class="calendar-viewport" id="calendar-viewport">
+        <div class="date-grid" id="date-grid" role="grid" aria-label="월간 달력"></div>
+      </div>
 
-        <!-- 날짜 그리드 래퍼 (perspective 컨텍스트) -->
-        <div class="calendar-viewport" id="calendar-viewport">
-          <div class="date-grid" id="date-grid" role="grid" aria-label="월간 달력"></div>
+      <!-- ── 하단 패널 (일정/일기/할일) ── -->
+      <section class="bottom-panel" aria-label="기록 패널">
+        <div class="bottom-panel__header">
+          <div class="bottom-tabs">
+            <button class="bottom-tab active" data-bottom-tab="schedule">일정</button>
+            <button class="bottom-tab" data-bottom-tab="diary">일기</button>
+            <button class="bottom-tab" data-bottom-tab="todo">할일</button>
+          </div>
         </div>
 
-        <!-- 선택된 날짜의 일정 목록 -->
-        <section class="schedule-section" aria-label="일정 목록">
-          <h2 class="schedule-section__title" id="schedule-title">일정</h2>
-          <div class="event-list" id="event-list" role="list"></div>
-        </section>
-
-        <!-- 앱 정보 푸터 -->
-        <footer style="padding: 20px 15px 30px; text-align: center; margin-top: auto;">
-          <div style="display: inline-block; padding-top: 15px; border-top: 1px dashed var(--paper-shadow);">
-            <strong style="font-family: var(--font-family); font-size: 0.9rem; color: var(--text-mid); display: block; margin-bottom: 4px; letter-spacing: 0.05em;">RetroLab Calendar</strong>
-            <span style="font-size: 0.75rem; color: var(--text-light); line-height: 1.5; font-family: var(--font-family-ui);">
-              구글 캘린더와 연동하여 일정을 안전하게 관리하는 모바일 웹 캘린더입니다.
-            </span>
+        <div class="bottom-panel__content">
+          <!-- 1. 일정 -->
+          <div id="panel-schedule" class="panel-view active">
+            <div class="event-list" id="event-list" role="list"></div>
           </div>
-        </footer>
+          <!-- 2. 일기장 -->
+          <div id="panel-diary" class="panel-view">
+            <section class="diary-section" id="diary-section">
+              <!-- JS에서 동적 렌더링 -->
+            </section>
+          </div>
+          <!-- 3. 할일 리스트 -->
+          <div id="panel-todo" class="panel-view">
+            <section class="todo-section" id="todo-section">
+              <!-- JS에서 동적 렌더링 -->
+            </section>
+          </div>
+        </div>
+      </section>
 
-      </div>
-
-      <!-- ── 탭 2: 일기장 ── -->
-      <div class="tab-view" id="tab-diary">
-        <section class="diary-section" id="diary-section">
-          <!-- JS에서 동적 렌더링 -->
-        </section>
-      </div>
-
-      <!-- ── 탭 3: 할일 리스트 ── -->
-      <div class="tab-view" id="tab-todo">
-        <section class="todo-section" id="todo-section">
-          <!-- JS에서 동적 렌더링 -->
-        </section>
-      </div>
+      <!-- 앱 정보 푸터 -->
+      <footer style="padding: 20px 15px 30px; text-align: center; margin-top: auto;">
+        <div style="display: inline-block; padding-top: 15px; border-top: 1px dashed var(--paper-shadow);">
+          <strong style="font-family: var(--font-family); font-size: 0.9rem; color: var(--text-mid); display: block; margin-bottom: 4px; letter-spacing: 0.05em;">RetroLab Calendar</strong>
+          <span style="font-size: 0.75rem; color: var(--text-light); line-height: 1.5; font-family: var(--font-family-ui);">
+            구글 캘린더와 연동하여 일정을 안전하게 관리하는 모바일 웹 캘린더입니다.
+          </span>
+        </div>
+      </footer>
 
     </main>
 
@@ -352,22 +358,37 @@
       </div>
     </div>
 
-    <!-- ── 하단 탭 바 ── -->
-    <nav class="tab-bar" id="tab-bar" aria-label="메인 탭">
-      <button class="tab-bar__item tab-bar__item--active" data-tab="calendar" aria-selected="true">
-        <span class="tab-bar__icon">📅</span>
-        <span class="tab-bar__label">캘린더</span>
-      </button>
-      <button class="tab-bar__item" data-tab="diary" aria-selected="false">
-        <span class="tab-bar__icon">📔</span>
-        <span class="tab-bar__label">일기장</span>
-      </button>
-      <button class="tab-bar__item" data-tab="todo" aria-selected="false">
-        <span class="tab-bar__icon">✅</span>
-        <span class="tab-bar__label">할일</span>
-      </button>
-    </nav>
+    <!-- ── 일정 공유 설정 모달 ── -->
+    <div class="modal-overlay" id="share-config-modal-overlay" aria-hidden="true">
+      <div class="event-modal" id="share-config-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+        <div class="event-modal__header">
+          <h2 class="event-modal__title" id="share-modal-title">일정 공유하기</h2>
+          <button class="event-modal__close" id="btn-close-share-modal" aria-label="닫기">×</button>
+        </div>
 
+        <div class="event-modal__body">
+          <div class="form-group">
+            <label class="form-label" for="share-nickname">보내는 분의 닉네임</label>
+            <input type="text" id="share-nickname" class="form-input" placeholder="예: 팀장님, 동네친구" autocomplete="off">
+            <small style="display: block; margin-top: 4px; color: var(--text-light); font-size: 0.75rem;">초대장 상단에 이 이름으로 표시됩니다.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">초대장 테마 선택</label>
+            <div class="share-theme-selector">
+              <button type="button" class="btn share-theme-btn active" data-theme="vintage">빈티지</button>
+              <button type="button" class="btn share-theme-btn" data-theme="pctel">PC통신</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-modal__footer">
+          <button type="button" class="btn btn--primary" id="btn-share-execute" style="width: 100%;">공유하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 탭 바 제거됨 (설정 메뉴로 이동) -->
   </div>
 
   <!-- JS (순서 중요: 의존성 순서대로 로드) -->
@@ -376,9 +397,10 @@
   <script src="js/googleCalendarAPI.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/eventModal.js"></script>
-  <script src="js/tabController.js"></script>
+  <!-- <script src="js/tabController.js"></script> 제거됨 -->
   <script src="js/diary.js"></script>
   <script src="js/todo.js"></script>
+  <script src="js/shareConfig.js"></script>
   <script src="js/app.js"></script>
 
   <!-- Service Worker Registration for PWA -->

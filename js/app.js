@@ -15,8 +15,10 @@ const App = (() => {
   const GOOGLE_CLIENT_ID = '335180485291-dujcjg64kdftu5uo04nheqflsg0jus01.apps.googleusercontent.com';
 
   // ── DOM 참조 (init 시 바인딩) ──
-  let _scheduleTitle = null;
   let _eventList = null;
+
+  // ── 하단 탭 상태 ('schedule' | 'diary' | 'todo') ──
+  let _activeBottomTab = 'schedule';
 
   /** 앱 초기화 */
   function init() {
@@ -27,7 +29,6 @@ const App = (() => {
       grid:    document.getElementById('date-grid')
     };
 
-    _scheduleTitle = document.getElementById('schedule-title');
     _eventList     = document.getElementById('event-list');
 
     // ── 이벤트 모달 초기화 ──
@@ -35,15 +36,12 @@ const App = (() => {
       EventModal.init(_onSaveEvent, _onDeleteEvent);
     }
 
-    // ── 탭 컨트롤러 초기화 ──
-    if (typeof TabController !== 'undefined') {
-      TabController.init(_onTabChange);
-    }
+    // ── 하단 탭 컨트롤러 초기화 ──
+    _initBottomTabs();
 
     // ── 일기장 초기화 ──
     if (typeof DiaryView !== 'undefined') {
       DiaryView.init(() => {
-        // 일기 변경 시 캘린더 갱신 (인디케이터 반영)
         _refreshCalendar();
       });
     }
@@ -51,17 +49,17 @@ const App = (() => {
     // ── 할일 리스트 초기화 ──
     if (typeof TodoView !== 'undefined') {
       TodoView.init(() => {
-        // 할일 변경 시 캘린더 갱신 (인디케이터 반영)
         _refreshCalendar();
       });
+      // 할일 리스트 최초 1회 렌더링
+      TodoView.render();
     }
 
     // FAB 버튼: 활성 탭에 따라 다른 모달 열기
     const btnAdd = document.getElementById('btn-add-event');
     if (btnAdd) {
       btnAdd.addEventListener('click', () => {
-        const activeTab = typeof TabController !== 'undefined' ? TabController.getActiveTab() : 'calendar';
-        switch (activeTab) {
+        switch (_activeBottomTab) {
           case 'diary':
             if (typeof DiaryView !== 'undefined') {
               DiaryView.openEditor(CalendarRenderer.getSelectedDate());
@@ -72,7 +70,7 @@ const App = (() => {
               TodoView.openModal();
             }
             break;
-          case 'calendar':
+          case 'schedule':
           default:
             EventModal.open(CalendarRenderer.getSelectedDate());
             break;
@@ -82,21 +80,21 @@ const App = (() => {
 
     // 캘린더 초기화
     CalendarRenderer.init(elements, (dateStr) => {
-      _renderEventList(dateStr, _scheduleTitle, _eventList);
-      // 일기장이 활성 탭이면 해당 날짜의 일기도 갱신
-      if (typeof TabController !== 'undefined' && TabController.getActiveTab() === 'diary') {
-        if (typeof DiaryView !== 'undefined') DiaryView.render(dateStr);
+      _renderEventList(dateStr, _eventList);
+      if (typeof DiaryView !== 'undefined') {
+        DiaryView.render(dateStr);
       }
+      _updateHeaderUI();
     });
 
-    // 오늘 날짜의 일정 표시
-    _renderEventList(
-      CalendarRenderer.getSelectedDate(),
-      _scheduleTitle,
-      _eventList
-    );
+    // 오늘 날짜의 일정 및 일기 렌더링
+    const initialDate = CalendarRenderer.getSelectedDate();
+    _renderEventList(initialDate, _eventList);
+    if (typeof DiaryView !== 'undefined') {
+      DiaryView.render(initialDate);
+    }
 
-    // ── 네비게이션 버튼 ──
+    // ── 네비게이션 버튼 (월 이동) ──
     document.getElementById('btn-prev').addEventListener('click', () => {
       CalendarRenderer.prevMonth(_motionMode);
       _onMonthChanged();
@@ -109,12 +107,12 @@ const App = (() => {
 
     document.getElementById('btn-today').addEventListener('click', () => {
       CalendarRenderer.goToToday();
-      _renderEventList(
-        CalendarRenderer.getSelectedDate(),
-        _scheduleTitle,
-        _eventList
-      );
-      _onMonthChanged();
+      const todayStr = CalendarRenderer.getSelectedDate();
+      _renderEventList(todayStr, _eventList);
+      if (typeof DiaryView !== 'undefined') {
+        DiaryView.render(todayStr);
+      }
+      _updateHeaderUI();
     });
 
     // 초기 테마 로드
@@ -308,6 +306,7 @@ const App = (() => {
       }
     } finally {
       _showSyncIndicator(false);
+      _updateHeaderUI();
     }
   }
 
@@ -319,9 +318,9 @@ const App = (() => {
     CalendarRenderer.renderMonth(currentMonth.year, currentMonth.month, null, null);
     _renderEventList(
       CalendarRenderer.getSelectedDate(),
-      _scheduleTitle,
       _eventList
     );
+    _updateHeaderUI();
   }
 
   /**
@@ -360,33 +359,63 @@ const App = (() => {
   }
 
   // ==============================
-  // 탭 전환 처리
+  // ── 하단 패널 탭 처리 ──
   // ==============================
 
-  /**
-   * 탭 변경 시 콜백
-   * @param {string} tabName - 새 탭 이름
-   * @param {string} prevTab - 이전 탭 이름
-   */
-  function _onTabChange(tabName, prevTab) {
-    const selectedDate = CalendarRenderer.getSelectedDate();
+  function _initBottomTabs() {
+    document.querySelectorAll('.bottom-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.bottomTab;
+        if (tabName === _activeBottomTab) return;
 
-    switch (tabName) {
-      case 'diary':
-        if (typeof DiaryView !== 'undefined') {
-          DiaryView.render(selectedDate);
+        // 버튼 활성 상태 토글
+        document.querySelectorAll('.bottom-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // 패널 뷰 전환
+        document.querySelectorAll('.panel-view').forEach(panel => {
+          if (panel.id === `panel-${tabName}`) {
+            panel.classList.add('active');
+            panel.style.animation = 'tabFadeIn 0.25s ease';
+            panel.addEventListener('animationend', () => {
+              panel.style.animation = '';
+            }, { once: true });
+          } else {
+            panel.classList.remove('active');
+          }
+        });
+
+        _activeBottomTab = tabName;
+
+        // 탭에 맞는 콘텐츠 렌더링 갱신
+        const selectedDate = CalendarRenderer.getSelectedDate();
+        if (tabName === 'schedule') {
+          _renderEventList(selectedDate, _eventList);
+        } else if (tabName === 'diary') {
+          if (typeof DiaryView !== 'undefined') DiaryView.render(selectedDate);
+        } else if (tabName === 'todo') {
+          if (typeof TodoView !== 'undefined') TodoView.render();
         }
-        break;
-      case 'todo':
-        if (typeof TodoView !== 'undefined') {
-          TodoView.render();
-        }
-        break;
-      case 'calendar':
-        // 캘린더로 돌아올 때 재렌더링 (인디케이터 갱신)
-        _refreshCalendar();
-        break;
-    }
+      });
+    });
+  }
+
+  function _updateHeaderUI() {
+    const yearEl = document.getElementById('header-year');
+    const monthEl = document.getElementById('header-month');
+    const btnToday = document.getElementById('btn-today');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+
+    yearEl.style.display = '';
+    const { year, month } = CalendarRenderer.getCurrentMonth();
+    yearEl.textContent = `${year}`;
+    const MONTHS_KR = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+    monthEl.textContent = MONTHS_KR[month];
+    
+    btnToday.style.display = '';
+    btnPrev.style.display = '';
+    btnNext.style.display = '';
   }
 
   // ==============================
@@ -426,14 +455,11 @@ const App = (() => {
   }
 
   /**
-   * 선택된 날짜의 일정 목록을 렌더링한다.
+   * 지정된 날짜의 이벤트를 렌더링한다.
+   * @param {string} dateStr - YYYY-MM-DD
+   * @param {HTMLElement} listEl
    */
-  function _renderEventList(dateStr, titleEl, listEl) {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
-    titleEl.textContent = `${m}월 ${d}일 ${dayNames[date.getDay()]}`;
-
+  function _renderEventList(dateStr, listEl) {
     const events = DataManager.getEventsByDate(dateStr);
 
     if (events.length === 0) {
@@ -465,16 +491,27 @@ const App = (() => {
             <div class="event-card__title">${evt.title}</div>
             ${locationHTML}
           </div>
+          <button class="btn-share-event" data-id="${evt.id}" aria-label="일정 공유" title="공유하기">🔗</button>
         </div>
       `;
     }).join('');
 
     // 이벤트 카드 클릭 시 편집 모달 열기
     listEl.querySelectorAll('.event-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
         const eventId = card.dataset.id;
         const events = DataManager.getEventsByDate(dateStr);
-        const evt = events.find(e => e.id === eventId);
+        const evt = events.find(event => event.id === eventId);
+        
+        // 공유 버튼 클릭 시 수정 모달 띄우지 않고 공유 모달 띄우기
+        if (e.target.closest('.btn-share-event')) {
+          e.stopPropagation();
+          if (evt && typeof ShareConfig !== 'undefined') {
+            ShareConfig.open(evt);
+          }
+          return;
+        }
+
         if (evt && typeof EventModal !== 'undefined') {
           EventModal.open(dateStr, evt);
         }

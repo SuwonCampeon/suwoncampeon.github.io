@@ -345,6 +345,15 @@ const CalendarRenderer = (() => {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
-  return { init, renderMonth, prevMonth, nextMonth, goToToday, getSelectedDate, getCurrentMonth };
+  /** 외부에서 특정 날짜로 이동하기 위한 인터페이스 */
+  function setDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    if (y !== _currentYear || m - 1 !== _currentMonth) {
+      renderMonth(y, m - 1, null, null);
+    }
+    _selectDate(dateStr);
+  }
+
+  return { init, renderMonth, prevMonth, nextMonth, goToToday, getSelectedDate, getCurrentMonth, setDate };
 
 })();

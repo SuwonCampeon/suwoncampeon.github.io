@@ -6,10 +6,8 @@
 /* ── 할일 섹션 ── */
 .todo-section {
   flex: 1;
-  padding: var(--spacing-lg) var(--spacing-xl);
-  padding-bottom: calc(var(--safe-bottom) + 80px);
-  background: var(--todo-bg);
-  min-height: 100%;
+  padding: var(--spacing-md) 0;
+  padding-bottom: var(--spacing-xl);
 }
 
 .todo-section__header {

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#3a1e0a">
+  
+  <!-- Open Graph Tags for KakaoTalk / iMessage Preview -->
+  <meta property="og:title" content="💌 누군가의 초대장이 도착했어요!">
+  <meta property="og:description" content="링크를 눌러 일정과 장소를 확인하고 내 캘린더에 추가해보세요!">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=1000&auto=format&fit=crop">
+  
+  <title>일정 초대장</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- PC통신 테마용 폰트 -->
+  <style>
+    @font-face {
+      font-family: 'DungGeunMo';
+      src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--leather-dark);
+      font-family: var(--font-family-ui);
+      color: var(--text-dark);
+    }
+
+    .invite-wrapper {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .invite-card {
+      background: var(--paper-warm);
+      border-radius: var(--radius-lg);
+      padding: 30px 20px;
+      box-shadow: var(--shadow-elevated);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    [data-theme="pctel"] .invite-card {
+      border: 2px solid #00FFFF;
+      border-radius: 0;
+    }
+
+    .invite-header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 1px dashed var(--paper-shadow);
+      padding-bottom: 15px;
+    }
+
+    .invite-header__sender {
+      font-size: var(--font-size-sm);
+      color: var(--text-mid);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .invite-header__title {
+      font-size: 1.4rem;
+      font-weight: var(--font-weight-bold);
+      margin: 0;
+      color: var(--text-dark);
+      font-family: var(--font-family);
+    }
+
+    .invite-details {
+      margin-bottom: 30px;
+    }
+
+    .detail-row {
+      display: flex;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .detail-icon {
+      font-size: 1.2rem;
+      margin-right: 12px;
+      line-height: 1.4;
+    }
+
+    .detail-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: var(--font-size-xs);
+      color: var(--text-light);
+      margin-bottom: 2px;
+    }
+
+    .detail-value {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.4;
+    }
+
+    .invite-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-bold);
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-action:active {
+      opacity: 0.8;
+    }
+
+    .btn-action--primary {
+      background: var(--event-color-blue);
+      color: #fff;
+      box-shadow: var(--shadow-button);
+    }
+
+    .btn-action--secondary {
+      background: transparent;
+      color: var(--text-mid);
+      border: 1px solid var(--paper-shadow);
+    }
+
+    [data-theme="pctel"] .btn-action {
+      border-radius: 0;
+      border: 1px solid #00FFFF;
+      background: #000080;
+      color: #00FFFF;
+      box-shadow: none;
+      font-family: 'DungGeunMo', monospace;
+    }
+    
+    [data-theme="pctel"] .btn-action--primary {
+      background: #00FFFF;
+      color: #000080;
+    }
+
+    .promo-banner {
+      text-align: center;
+      margin-top: auto;
+      padding: 20px;
+    }
+
+    .promo-banner a {
+      color: var(--paper-cream); /* Changed from leather-highlight to cream for visibility on dark leather */
+      text-decoration: underline;
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      opacity: 0.9;
+    }
+
+    .promo-banner a:hover {
+      opacity: 1;
+      color: #ffffff;
+    }
+
+    [data-theme="pctel"] .promo-banner a {
+      color: #00FFFF;
+    }
+
+    #error-message {
+      text-align: center;
+      color: var(--accent-red);
+      padding: 20px;
+      display: none;
+    }
+  </style>
+
+  <!-- CSS (기존 앱 테마 재사용) -->
+  <link rel="stylesheet" href="css/variables.css">
+</head>
+
+<body>
+  <div class="invite-wrapper">
+    <div id="error-message">유효하지 않은 초대장 링크입니다.</div>
+
+    <div class="invite-card" id="invite-card" style="display: none;">
+      <div class="invite-header">
+        <span class="invite-header__sender" id="display-sender">보낸사람: </span>
+        <h1 class="invite-header__title" id="display-title">일정 제목</h1>
+      </div>
+
+      <div class="invite-details">
+        <div class="detail-row">
+          <div class="detail-icon">📅</div>
+          <div class="detail-content">
+            <span class="detail-label">날짜</span>
+            <span class="detail-value" id="display-date">YYYY년 MM월 DD일 (요일)</span>
+          </div>
+        </div>
+
+        <div class="detail-row" id="time-row">
+          <div class="detail-icon">⏰</div>
+          <div class="detail-content">
+            <span class="detail-label">시간</span>
+            <span class="detail-value" id="display-time">오후 00:00 ~ 오후 00:00</span>
+          </div>
+        </div>
+
+        <div class="detail-row" id="location-row" style="display: none;">
+          <div class="detail-icon">📍</div>
+          <div class="detail-content">
+            <span class="detail-label">장소</span>
+            <span class="detail-value" id="display-location">강남역</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="invite-actions">
+        <div style="font-size: 0.75rem; text-align: center; margin-bottom: -4px; color: var(--text-light);">어떤 스마트폰을 사용하시나요?</div>
+        <button class="btn-action btn-action--primary" id="btn-add-samsung">📱 삼성 캘린더에서 바로 열기</button>
+        <button class="btn-action btn-action--primary" id="btn-add-apple">🍎 애플 캘린더에서 바로 열기</button>
+      </div>
+    </div>
+
+    <div class="promo-banner" id="promo-banner" style="display: none;">
+      <a href="index.html">✨ 나도 레트로랩에서 일정 공유해보기</a>
+    </div>
+  </div>
+
+  <script src="js/share.js"></script>
+</body>
+</html>
