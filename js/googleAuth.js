@@ -6,7 +6,7 @@
 const GoogleAuth = (() => {
 
   // ── 설정 ──
-  const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/userinfo.email';
+  const SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email';
 
   // ── 상태 ──
   let _tokenClient = null;
