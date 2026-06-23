@@ -47,7 +47,7 @@ const ShareConfig = (() => {
     
     // 테마 초기화 (기본 빈티지)
     _themeBtns.forEach(b => b.classList.remove('active'));
-    document.querySelector('.share-theme-btn[data-theme="vintage"]').classList.add('active');
+    document.querySelector('.share-theme-btn[data-share-theme="vintage"]').classList.add('active');
 
     _overlay.setAttribute('aria-hidden', 'false');
   }
@@ -59,7 +59,7 @@ const ShareConfig = (() => {
 
   function _getTheme() {
     const activeBtn = Array.from(_themeBtns).find(btn => btn.classList.contains('active'));
-    return activeBtn ? activeBtn.dataset.theme : 'vintage';
+    return activeBtn ? activeBtn.dataset.shareTheme : 'vintage';
   }
 
   async function _executeShare() {

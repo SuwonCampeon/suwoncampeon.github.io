@@ -1015,9 +1015,11 @@ body {
 .share-theme-btn {
   flex: 1;
   padding: 10px;
-  border: 2px solid transparent;
+  border: 1px solid var(--paper-shadow);
+  border-radius: var(--radius-sm);
   transition: all 0.2s ease;
-  background: transparent;
+  background: var(--paper-warm); /* 모달 배경(cream)과 구분되도록 밝은 톤 적용 */
+  color: var(--text-dark);
   cursor: pointer;
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-sm);
@@ -1025,38 +1027,22 @@ body {
 
 .share-theme-btn.active {
   transform: scale(1.02);
-}
-
-/* 빈티지 버튼 - 선택 안 됨 */
-.share-theme-btn[data-theme="vintage"] {
-  background: var(--paper-cream);
-  color: var(--text-dark);
-  border-radius: var(--radius-md);
-  border-color: transparent;
-}
-
-/* 빈티지 버튼 - 선택 됨 (가죽 배경 + 흰 글씨) */
-.share-theme-btn[data-theme="vintage"].active {
   background: var(--leather-dark);
-  color: #ffffff;
+  color: white;
   border-color: var(--leather-dark);
-  box-shadow: 0 4px 10px hsla(24, 30%, 0%, 0.3);
+  box-shadow: 0 4px 10px hsla(24, 30%, 0%, 0.2);
 }
 
-/* PC통신 버튼 - 선택 안 됨 (눈에 덜 띄게) */
-.share-theme-btn[data-theme="pctel"] {
-  background: hsla(0, 0%, 0%, 0.05);
-  color: #000080;
-  font-family: 'DungGeunMo', monospace;
+/* PC통신 테마 모달 오버라이드 */
+[data-theme="pctel"] .share-theme-btn {
+  background: transparent;
+  border: 1px dashed var(--text-light);
+  color: var(--text-light);
   border-radius: 0;
-  border-color: transparent;
-  border: 1px dashed #000080;
 }
 
-/* PC통신 버튼 - 선택 됨 (확실한 파랑 + 형광색 테두리) */
-.share-theme-btn[data-theme="pctel"].active {
-  border: 2px solid #00FFFF;
-  background: #000080;
-  color: #00FFFF;
-  box-shadow: 0 4px 10px hsla(240, 100%, 25%, 0.4);
+[data-theme="pctel"] .share-theme-btn.active {
+  background: var(--text-light);
+  color: var(--leather-dark);
+  border: 1px solid var(--text-light);
 }
