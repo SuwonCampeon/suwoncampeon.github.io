@@ -297,6 +297,28 @@ const CalendarRenderer = (() => {
       });
     }
 
+    // 일기 인디케이터
+    if (typeof DiaryManager !== 'undefined' && DiaryManager.hasEntry(cell.dateStr)) {
+      const diaryDot = document.createElement('div');
+      diaryDot.className = 'date-cell__diary-dot';
+      diaryDot.textContent = '📔';
+      diaryDot.setAttribute('aria-label', '일기 있음');
+      el.appendChild(diaryDot);
+    }
+
+    // 할일 인디케이터
+    if (typeof TodoManager !== 'undefined') {
+      const todos = TodoManager.getByDueDate(cell.dateStr);
+      if (todos.length > 0) {
+        const allDone = todos.every(t => t.completed);
+        const todoDot = document.createElement('div');
+        todoDot.className = 'date-cell__todo-dot';
+        todoDot.textContent = allDone ? '✅' : '📝';
+        todoDot.setAttribute('aria-label', allDone ? '할일 모두 완료' : '할일 있음');
+        el.appendChild(todoDot);
+      }
+    }
+
     el.addEventListener('click', () => _selectDate(cell.dateStr));
     return el;
   }

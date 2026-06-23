@@ -35,6 +35,8 @@
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/diary.css">
+  <link rel="stylesheet" href="css/todo.css">
 </head>
 
 <body>
@@ -116,29 +118,48 @@
     <!-- ── 메인 콘텐츠 ── -->
     <main class="app-content">
 
-      <!-- 요일 행 -->
-      <div class="weekday-row" id="weekday-row" role="row" aria-label="요일"></div>
+      <!-- ── 탭 1: 캘린더 (기존) ── -->
+      <div class="tab-view tab-view--active" id="tab-calendar">
 
-      <!-- 날짜 그리드 래퍼 (perspective 컨텍스트) -->
-      <div class="calendar-viewport" id="calendar-viewport">
-        <div class="date-grid" id="date-grid" role="grid" aria-label="월간 달력"></div>
+        <!-- 요일 행 -->
+        <div class="weekday-row" id="weekday-row" role="row" aria-label="요일"></div>
+
+        <!-- 날짜 그리드 래퍼 (perspective 컨텍스트) -->
+        <div class="calendar-viewport" id="calendar-viewport">
+          <div class="date-grid" id="date-grid" role="grid" aria-label="월간 달력"></div>
+        </div>
+
+        <!-- 선택된 날짜의 일정 목록 -->
+        <section class="schedule-section" aria-label="일정 목록">
+          <h2 class="schedule-section__title" id="schedule-title">일정</h2>
+          <div class="event-list" id="event-list" role="list"></div>
+        </section>
+
+        <!-- 앱 정보 푸터 -->
+        <footer style="padding: 20px 15px 30px; text-align: center; margin-top: auto;">
+          <div style="display: inline-block; padding-top: 15px; border-top: 1px dashed var(--paper-shadow);">
+            <strong style="font-family: var(--font-family); font-size: 0.9rem; color: var(--text-mid); display: block; margin-bottom: 4px; letter-spacing: 0.05em;">RetroLab Calendar</strong>
+            <span style="font-size: 0.75rem; color: var(--text-light); line-height: 1.5; font-family: var(--font-family-ui);">
+              구글 캘린더와 연동하여 일정을 안전하게 관리하는 모바일 웹 캘린더입니다.
+            </span>
+          </div>
+        </footer>
+
       </div>
 
-      <!-- 선택된 날짜의 일정 목록 -->
-      <section class="schedule-section" aria-label="일정 목록">
-        <h2 class="schedule-section__title" id="schedule-title">일정</h2>
-        <div class="event-list" id="event-list" role="list"></div>
-      </section>
+      <!-- ── 탭 2: 일기장 ── -->
+      <div class="tab-view" id="tab-diary">
+        <section class="diary-section" id="diary-section">
+          <!-- JS에서 동적 렌더링 -->
+        </section>
+      </div>
 
-      <!-- 앱 정보 푸터 -->
-      <footer style="padding: 20px 15px 30px; text-align: center; margin-top: auto;">
-        <div style="display: inline-block; padding-top: 15px; border-top: 1px dashed var(--paper-shadow);">
-          <strong style="font-family: var(--font-family); font-size: 0.9rem; color: var(--text-mid); display: block; margin-bottom: 4px; letter-spacing: 0.05em;">RetroLab Calendar</strong>
-          <span style="font-size: 0.75rem; color: var(--text-light); line-height: 1.5; font-family: var(--font-family-ui);">
-            구글 캘린더와 연동하여 일정을 안전하게 관리하는 모바일 웹 캘린더입니다.
-          </span>
-        </div>
-      </footer>
+      <!-- ── 탭 3: 할일 리스트 ── -->
+      <div class="tab-view" id="tab-todo">
+        <section class="todo-section" id="todo-section">
+          <!-- JS에서 동적 렌더링 -->
+        </section>
+      </div>
 
     </main>
 
@@ -223,6 +244,130 @@
       </div>
     </div>
 
+    <!-- ── 일기장 작성/편집 모달 ── -->
+    <div class="modal-overlay" id="diary-modal-overlay" aria-hidden="true">
+      <div class="event-modal" id="diary-modal" role="dialog" aria-modal="true" aria-labelledby="diary-modal-title">
+        <div class="event-modal__header">
+          <h2 class="event-modal__title" id="diary-modal-title">일기 쓰기</h2>
+          <button class="event-modal__close" id="btn-close-diary-modal" aria-label="닫기">×</button>
+        </div>
+
+        <form class="event-modal__body" id="diary-form">
+          <div class="form-group form-group--inline">
+            <label class="form-label" for="diary-modal-date">날짜</label>
+            <input type="date" id="diary-modal-date" class="form-input" disabled>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">기분</label>
+            <div class="diary-modal__mood-picker">
+              <div class="mood-option" data-mood="happy" title="좋음">😊</div>
+              <div class="mood-option" data-mood="neutral" title="보통">😐</div>
+              <div class="mood-option" data-mood="sad" title="슬픔">😢</div>
+              <div class="mood-option" data-mood="angry" title="화남">😡</div>
+              <div class="mood-option" data-mood="sleepy" title="졸림">😴</div>
+              <div class="mood-option" data-mood="thinking" title="생각">🤔</div>
+              <div class="mood-option" data-mood="love" title="사랑">🥰</div>
+              <div class="mood-option" data-mood="excited" title="신남">🤩</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">날씨</label>
+            <div class="diary-modal__weather-picker">
+              <div class="weather-option" data-weather="sunny" title="맑음">☀️</div>
+              <div class="weather-option" data-weather="cloudy-sun" title="구름 조금">⛅</div>
+              <div class="weather-option" data-weather="cloudy" title="흐림">☁️</div>
+              <div class="weather-option" data-weather="rainy" title="비">🌧️</div>
+              <div class="weather-option" data-weather="snowy" title="눈">❄️</div>
+              <div class="weather-option" data-weather="windy" title="바람">🌬️</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="diary-content">내용</label>
+            <textarea id="diary-content" class="diary-modal__textarea" placeholder="오늘 하루를 기록해보세요..." rows="6"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">사진 첨부</label>
+            <div class="diary-modal__photos">
+              <div id="diary-photo-previews" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+              <button type="button" class="diary-modal__photo-add" id="diary-photo-add-btn" title="사진 추가">📷</button>
+              <input type="file" id="diary-photo-input" accept="image/*" multiple style="display: none;">
+            </div>
+          </div>
+        </form>
+
+        <div class="event-modal__footer">
+          <button type="submit" form="diary-form" class="btn btn--primary">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 할일 추가/편집 모달 ── -->
+    <div class="modal-overlay" id="todo-modal-overlay" aria-hidden="true">
+      <div class="event-modal" id="todo-modal" role="dialog" aria-modal="true" aria-labelledby="todo-modal-title">
+        <div class="event-modal__header">
+          <h2 class="event-modal__title" id="todo-modal-title">새 할일</h2>
+          <button class="event-modal__close" id="btn-close-todo-modal" aria-label="닫기">×</button>
+        </div>
+
+        <form class="event-modal__body" id="todo-form">
+          <input type="hidden" id="todo-id">
+
+          <div class="form-group">
+            <input type="text" id="todo-title" class="form-input" placeholder="할일 제목" required autocomplete="off">
+          </div>
+
+          <div class="form-group form-group--inline">
+            <label class="form-label" for="todo-duedate">마감일</label>
+            <input type="date" id="todo-duedate" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">우선순위</label>
+            <div class="todo-modal__priority-picker">
+              <div class="priority-option priority-option--high" data-priority="high">🔴 높음</div>
+              <div class="priority-option priority-option--medium selected" data-priority="medium">🟡 보통</div>
+              <div class="priority-option priority-option--low" data-priority="low">🔵 낮음</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">카테고리</label>
+            <div class="todo-modal__category-picker">
+              <div class="category-option category-option--work" data-category="work">💼 업무</div>
+              <div class="category-option category-option--study" data-category="study">📚 학습</div>
+              <div class="category-option category-option--exercise" data-category="exercise">🏃 운동</div>
+              <div class="category-option category-option--life" data-category="life">🏠 생활</div>
+            </div>
+          </div>
+        </form>
+
+        <div class="event-modal__footer">
+          <button type="button" class="btn btn--danger" id="btn-delete-todo" style="display: none;">삭제</button>
+          <button type="submit" form="todo-form" class="btn btn--primary">저장</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 하단 탭 바 ── -->
+    <nav class="tab-bar" id="tab-bar" aria-label="메인 탭">
+      <button class="tab-bar__item tab-bar__item--active" data-tab="calendar" aria-selected="true">
+        <span class="tab-bar__icon">📅</span>
+        <span class="tab-bar__label">캘린더</span>
+      </button>
+      <button class="tab-bar__item" data-tab="diary" aria-selected="false">
+        <span class="tab-bar__icon">📔</span>
+        <span class="tab-bar__label">일기장</span>
+      </button>
+      <button class="tab-bar__item" data-tab="todo" aria-selected="false">
+        <span class="tab-bar__icon">✅</span>
+        <span class="tab-bar__label">할일</span>
+      </button>
+    </nav>
+
   </div>
 
   <!-- JS (순서 중요: 의존성 순서대로 로드) -->
@@ -231,6 +376,9 @@
   <script src="js/googleCalendarAPI.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/eventModal.js"></script>
+  <script src="js/tabController.js"></script>
+  <script src="js/diary.js"></script>
+  <script src="js/todo.js"></script>
   <script src="js/app.js"></script>
 
   <!-- Service Worker Registration for PWA -->

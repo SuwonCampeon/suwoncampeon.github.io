@@ -314,3 +314,259 @@ const DataManager = (() => {
   };
 
 })();
+
+/* ============================================
+   DiaryManager — 일기장 데이터 관리
+   localStorage 기반 CRUD
+   ============================================ */
+
+const DiaryManager = (() => {
+
+  const CACHE_KEY = 'diary_entries';
+  let _entries = [];
+
+  // ── 초기화: localStorage에서 로드 ──
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      _entries = JSON.parse(cached);
+    }
+  } catch (e) {
+    console.warn('[DiaryManager] 일기 데이터 로드 실패', e);
+  }
+
+  function _save() {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(_entries));
+    } catch (e) {
+      console.warn('[DiaryManager] 일기 저장 실패', e);
+    }
+  }
+
+  /**
+   * 특정 날짜의 일기를 반환한다.
+   * @param {string} dateStr - YYYY-MM-DD
+   * @returns {Object|null}
+   */
+  function getEntryByDate(dateStr) {
+    return _entries.find(e => e.date === dateStr) || null;
+  }
+
+  /**
+   * 일기를 저장한다 (upsert).
+   * 같은 날짜의 일기가 있으면 업데이트, 없으면 추가한다.
+   * @param {Object} entry
+   */
+  function saveEntry(entry) {
+    const idx = _entries.findIndex(e => e.date === entry.date);
+    const now = new Date().toISOString();
+
+    if (idx !== -1) {
+      _entries[idx] = { ..._entries[idx], ...entry, updatedAt: now };
+    } else {
+      _entries.push({
+        id: `diary-${Date.now()}`,
+        createdAt: now,
+        updatedAt: now,
+        photos: [],
+        ...entry
+      });
+    }
+    _save();
+  }
+
+  /**
+   * 특정 날짜의 일기를 삭제한다.
+   * @param {string} dateStr - YYYY-MM-DD
+   */
+  function deleteEntry(dateStr) {
+    _entries = _entries.filter(e => e.date !== dateStr);
+    _save();
+  }
+
+  /**
+   * 특정 날짜에 일기가 있는지 확인한다.
+   * @param {string} dateStr - YYYY-MM-DD
+   * @returns {boolean}
+   */
+  function hasEntry(dateStr) {
+    return _entries.some(e => e.date === dateStr);
+  }
+
+  /**
+   * 특정 월의 일기가 있는 날짜 set을 반환한다.
+   * @param {number} year
+   * @param {number} month - 0~11
+   * @returns {Set<string>}
+   */
+  function getEntriesForMonth(year, month) {
+    const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const dateSet = new Set();
+    _entries.forEach(e => {
+      if (e.date.startsWith(prefix)) {
+        dateSet.add(e.date);
+      }
+    });
+    return dateSet;
+  }
+
+  return { getEntryByDate, saveEntry, deleteEntry, hasEntry, getEntriesForMonth };
+})();
+
+
+/* ============================================
+   TodoManager — 할일 리스트 데이터 관리
+   localStorage 기반 CRUD
+   ============================================ */
+
+const TodoManager = (() => {
+
+  const CACHE_KEY = 'todo_items';
+  let _items = [];
+
+  // ── 초기화: localStorage에서 로드 ──
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      _items = JSON.parse(cached);
+    }
+  } catch (e) {
+    console.warn('[TodoManager] 할일 데이터 로드 실패', e);
+  }
+
+  function _save() {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(_items));
+    } catch (e) {
+      console.warn('[TodoManager] 할일 저장 실패', e);
+    }
+  }
+
+  /**
+   * 전체 할일 목록을 반환한다.
+   * @param {string} filter - 'all' | 'active' | 'done'
+   * @returns {Array}
+   */
+  function getAll(filter = 'all') {
+    let items = [..._items];
+    if (filter === 'active') items = items.filter(i => !i.completed);
+    if (filter === 'done') items = items.filter(i => i.completed);
+
+    // 정렬: 미완료 → 우선순위순 → 마감일순
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    items.sort((a, b) => {
+      // 완료된 것은 아래로
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // 우선순위
+      const pa = priorityOrder[a.priority] ?? 1;
+      const pb = priorityOrder[b.priority] ?? 1;
+      if (pa !== pb) return pa - pb;
+      // 마감일
+      if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      if (a.dueDate && !b.dueDate) return -1;
+      if (!a.dueDate && b.dueDate) return 1;
+      // 생성일
+      return (b.createdAt || '').localeCompare(a.createdAt || '');
+    });
+
+    return items;
+  }
+
+  /**
+   * 특정 마감일의 할일을 반환한다.
+   * @param {string} dateStr - YYYY-MM-DD
+   * @returns {Array}
+   */
+  function getByDueDate(dateStr) {
+    return _items.filter(i => i.dueDate === dateStr);
+  }
+
+  /**
+   * 할일을 추가한다.
+   * @param {Object} item
+   */
+  function addItem(item) {
+    const now = new Date().toISOString();
+    _items.push({
+      id: `todo-${Date.now()}`,
+      completed: false,
+      completedAt: null,
+      createdAt: now,
+      sortOrder: _items.length,
+      ...item
+    });
+    _save();
+  }
+
+  /**
+   * 할일을 업데이트한다.
+   * @param {string} id
+   * @param {Object} data
+   */
+  function updateItem(id, data) {
+    const idx = _items.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      _items[idx] = { ..._items[idx], ...data };
+      _save();
+    }
+  }
+
+  /**
+   * 할일을 삭제한다.
+   * @param {string} id
+   */
+  function removeItem(id) {
+    _items = _items.filter(i => i.id !== id);
+    _save();
+  }
+
+  /**
+   * 완료 상태를 토글한다.
+   * @param {string} id
+   * @returns {boolean} 토글 후 완료 상태
+   */
+  function toggleComplete(id) {
+    const item = _items.find(i => i.id === id);
+    if (item) {
+      item.completed = !item.completed;
+      item.completedAt = item.completed ? new Date().toISOString() : null;
+      _save();
+      return item.completed;
+    }
+    return false;
+  }
+
+  /**
+   * 진행률을 반환한다.
+   * @returns {{ total: number, done: number, percent: number }}
+   */
+  function getCompletionRate() {
+    const total = _items.length;
+    const done = _items.filter(i => i.completed).length;
+    return {
+      total,
+      done,
+      percent: total === 0 ? 0 : Math.round((done / total) * 100)
+    };
+  }
+
+  /**
+   * 특정 월의 마감일이 있는 할일을 날짜별로 그룹화한다.
+   * @param {number} year
+   * @param {number} month - 0~11
+   * @returns {Map<string, Array>}
+   */
+  function getTodosForMonth(year, month) {
+    const prefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const map = new Map();
+    _items.forEach(item => {
+      if (item.dueDate && item.dueDate.startsWith(prefix)) {
+        if (!map.has(item.dueDate)) map.set(item.dueDate, []);
+        map.get(item.dueDate).push(item);
+      }
+    });
+    return map;
+  }
+
+  return { getAll, getByDueDate, addItem, updateItem, removeItem, toggleComplete, getCompletionRate, getTodosForMonth };
+})();

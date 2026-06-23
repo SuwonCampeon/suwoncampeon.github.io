@@ -98,6 +98,36 @@
   /* ── 안전 영역 ── */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ── 일기장 ── */
+  --diary-bg:            var(--paper-cream);
+  --diary-text:          var(--text-dark);
+  --diary-line-color:    var(--paper-line);
+  --diary-placeholder:   var(--text-light);
+  --diary-mood-bg:       hsla(44, 40%, 90%, 0.6);
+  --diary-photo-border:  var(--paper-shadow);
+
+  /* ── 할일 리스트 ── */
+  --todo-bg:             var(--paper-warm);
+  --todo-text:           var(--text-dark);
+  --todo-check-color:    hsl(140, 50%, 40%);
+  --todo-done-text:      var(--text-light);
+  --todo-priority-high:  hsl(4, 68%, 46%);
+  --todo-priority-medium:hsl(44, 80%, 50%);
+  --todo-priority-low:   hsl(210, 55%, 46%);
+  --todo-category-work:  hsl(210, 55%, 46%);
+  --todo-category-study: hsl(270, 38%, 48%);
+  --todo-category-exercise: hsl(140, 42%, 40%);
+  --todo-category-life:  hsl(28, 78%, 50%);
+  --todo-progress-bg:    var(--paper-darker);
+  --todo-progress-fill:  hsl(140, 50%, 40%);
+
+  /* ── 탭 바 ── */
+  --tab-bar-bg:          var(--leather-dark);
+  --tab-bar-border:      var(--leather-highlight);
+  --tab-bar-active:      var(--accent-red);
+  --tab-bar-inactive:    hsl(24, 18%, 62%);
+  --tab-bar-label:       hsl(24, 18%, 72%);
 }
 
 /* ============================================
@@ -165,4 +195,34 @@
   --radius-md: 0px;
   --radius-lg: 0px;
   --radius-full: 0px; /* 모든 걸 각지게 */
+
+  /* ── 일기장 ── */
+  --diary-bg:            var(--leather-dark);
+  --diary-text:          #00FF00;
+  --diary-line-color:    transparent;
+  --diary-placeholder:   #00FFFF;
+  --diary-mood-bg:       transparent;
+  --diary-photo-border:  #00FFFF;
+
+  /* ── 할일 리스트 ── */
+  --todo-bg:             var(--leather-dark);
+  --todo-text:           #FFFFFF;
+  --todo-check-color:    #00FF00;
+  --todo-done-text:      #00FFFF;
+  --todo-priority-high:  #FF0000;
+  --todo-priority-medium:#FFFF00;
+  --todo-priority-low:   #00FFFF;
+  --todo-category-work:  #00FFFF;
+  --todo-category-study: #FF00FF;
+  --todo-category-exercise: #00FF00;
+  --todo-category-life:  #FFFF00;
+  --todo-progress-bg:    #000080;
+  --todo-progress-fill:  #00FF00;
+
+  /* ── 탭 바 ── */
+  --tab-bar-bg:          #000080;
+  --tab-bar-border:      #00FFFF;
+  --tab-bar-active:      #FFFFFF;
+  --tab-bar-inactive:    #00FFFF;
+  --tab-bar-label:       #00FFFF;
 }

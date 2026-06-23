@@ -1,0 +1,484 @@
+/* ============================================
+   todo.css — 할일 리스트 스타일
+   빈티지 노트 / PC통신 양 테마 지원
+   ============================================ */
+
+/* ── 할일 섹션 ── */
+.todo-section {
+  flex: 1;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  padding-bottom: calc(var(--safe-bottom) + 80px);
+  background: var(--todo-bg);
+  min-height: 100%;
+}
+
+.todo-section__header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.todo-section__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.todo-section__title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family);
+  color: var(--text-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--accent-red);
+  display: inline-block;
+}
+
+.todo-section__count {
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
+  font-family: var(--font-family-ui);
+}
+
+/* ── 진행률 바 ── */
+.todo-progress {
+  height: 6px;
+  background: var(--todo-progress-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  box-shadow: inset 0 1px 2px hsla(0, 0%, 0%, 0.15);
+}
+
+.todo-progress__fill {
+  height: 100%;
+  background: var(--todo-progress-fill);
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-width: 0;
+}
+
+.todo-progress__text {
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
+  font-family: var(--font-family-ui);
+  text-align: right;
+  margin-top: 2px;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* ── 필터 탭 ── */
+.todo-filters {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.todo-filter-btn {
+  padding: 3px var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--paper-shadow);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.todo-filter-btn.active {
+  background: var(--accent-red);
+  color: #fff;
+  border-color: var(--accent-red);
+}
+
+/* ── 그룹 제목 ── */
+.todo-group__title {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--spacing-sm) 0 var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.todo-group__title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--paper-shadow);
+}
+
+/* ── 할일 아이템 ── */
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--paper-cream);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px hsla(0, 0%, 0%, 0.08);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.todo-item:active {
+  transform: scale(0.99);
+  box-shadow: inset 0 1px 3px hsla(0, 0%, 0%, 0.12);
+}
+
+.todo-item--done {
+  opacity: 0.55;
+}
+
+.todo-item--done .todo-item__title {
+  text-decoration: line-through;
+  color: var(--todo-done-text);
+}
+
+/* 체크박스 */
+.todo-item__check {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 2px solid var(--paper-shadow);
+  border-radius: 4px;
+  background: var(--paper-warm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.todo-item__check--checked {
+  background: var(--todo-check-color);
+  border-color: var(--todo-check-color);
+}
+
+.todo-item__check-icon {
+  font-size: 12px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.todo-item__check--checked .todo-item__check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 텍스트 영역 */
+.todo-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-item__title {
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  color: var(--todo-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.todo-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: 2px;
+}
+
+.todo-item__due {
+  font-size: var(--font-size-xs);
+  color: var(--text-light);
+  font-family: var(--font-family-ui);
+}
+
+.todo-item__due--overdue {
+  color: var(--todo-priority-high);
+  font-weight: var(--font-weight-bold);
+}
+
+.todo-item__category {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: 6px;
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-bold);
+  color: #fff;
+}
+
+.todo-item__category--work    { background: var(--todo-category-work); }
+.todo-item__category--study   { background: var(--todo-category-study); }
+.todo-item__category--exercise{ background: var(--todo-category-exercise); }
+.todo-item__category--life    { background: var(--todo-category-life); }
+
+/* 우선순위 인디케이터 */
+.todo-item__priority {
+  width: 4px;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.todo-item__priority--high   { background: var(--todo-priority-high); }
+.todo-item__priority--medium { background: var(--todo-priority-medium); }
+.todo-item__priority--low    { background: var(--todo-priority-low); }
+
+/* 삭제 버튼 */
+.todo-item__delete {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  opacity: 0;
+}
+
+.todo-item:hover .todo-item__delete,
+.todo-item:active .todo-item__delete {
+  opacity: 1;
+}
+
+.todo-item__delete:active {
+  background: hsla(4, 68%, 46%, 0.15);
+  color: var(--accent-red);
+}
+
+/* ── 빈 상태 ── */
+.todo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.todo-empty__icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.todo-empty__text {
+  font-size: var(--font-size-base);
+  color: var(--text-light);
+  font-family: var(--font-family);
+}
+
+/* ── 할일 모달 추가 폼 ── */
+.todo-modal__priority-picker {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.priority-option {
+  flex: 1;
+  padding: 6px;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--paper-aged);
+  color: var(--text-mid);
+}
+
+.priority-option:active {
+  transform: scale(0.96);
+}
+
+.priority-option.selected {
+  transform: scale(1.02);
+}
+
+.priority-option--high.selected {
+  border-color: var(--todo-priority-high);
+  background: hsla(4, 68%, 46%, 0.1);
+  color: var(--todo-priority-high);
+}
+
+.priority-option--medium.selected {
+  border-color: var(--todo-priority-medium);
+  background: hsla(44, 80%, 50%, 0.1);
+  color: hsl(44, 80%, 38%);
+}
+
+.priority-option--low.selected {
+  border-color: var(--todo-priority-low);
+  background: hsla(210, 55%, 46%, 0.1);
+  color: var(--todo-priority-low);
+}
+
+.todo-modal__category-picker {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.category-option {
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--paper-shadow);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.category-option:active {
+  transform: scale(0.96);
+}
+
+.category-option.selected {
+  color: #fff;
+}
+
+.category-option--work.selected    { background: var(--todo-category-work); border-color: var(--todo-category-work); }
+.category-option--study.selected   { background: var(--todo-category-study); border-color: var(--todo-category-study); }
+.category-option--exercise.selected{ background: var(--todo-category-exercise); border-color: var(--todo-category-exercise); }
+.category-option--life.selected    { background: var(--todo-category-life); border-color: var(--todo-category-life); }
+
+/* ============================================
+   PC통신 테마 오버라이드
+   ============================================ */
+[data-theme="pctel"] .todo-section {
+  background: var(--todo-bg);
+}
+
+[data-theme="pctel"] .todo-progress {
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid var(--text-light);
+}
+
+[data-theme="pctel"] .todo-progress__fill {
+  border-radius: 0;
+}
+
+[data-theme="pctel"] .todo-filter-btn {
+  border: 1px solid var(--text-light);
+  border-radius: 0;
+  color: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-filter-btn.active {
+  background: var(--text-light);
+  color: var(--leather-dark);
+  border-color: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-group__title {
+  color: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-group__title::after {
+  background: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-item {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-theme="pctel"] .todo-item__check {
+  border-radius: 0;
+  border-color: var(--text-light);
+  background: transparent;
+}
+
+[data-theme="pctel"] .todo-item__check--checked {
+  background: var(--todo-check-color);
+  border-color: var(--todo-check-color);
+}
+
+[data-theme="pctel"] .todo-item__priority {
+  border-radius: 0;
+}
+
+[data-theme="pctel"] .todo-item__category {
+  border-radius: 0;
+}
+
+[data-theme="pctel"] .todo-item__title {
+  color: var(--todo-text);
+}
+
+[data-theme="pctel"] .todo-item--done .todo-item__title {
+  color: var(--todo-done-text);
+}
+
+[data-theme="pctel"] .todo-item__delete {
+  opacity: 1;
+  color: var(--text-light);
+  border-radius: 0;
+}
+
+[data-theme="pctel"] .todo-empty__text {
+  color: var(--text-light);
+}
+
+[data-theme="pctel"] .priority-option {
+  background: transparent;
+  border: 1px solid var(--text-light);
+  border-radius: 0;
+  color: var(--text-light);
+}
+
+[data-theme="pctel"] .priority-option.selected {
+  background: transparent;
+}
+
+[data-theme="pctel"] .category-option {
+  border-color: var(--text-light);
+  border-radius: 0;
+  color: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-section__header {
+  border-bottom-color: var(--text-light);
+}
+
+[data-theme="pctel"] .todo-section__title {
+  border-bottom-color: var(--text-light);
+}

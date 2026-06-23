@@ -34,16 +34,59 @@ const App = (() => {
     if (typeof EventModal !== 'undefined') {
       EventModal.init(_onSaveEvent, _onDeleteEvent);
     }
+
+    // ── 탭 컨트롤러 초기화 ──
+    if (typeof TabController !== 'undefined') {
+      TabController.init(_onTabChange);
+    }
+
+    // ── 일기장 초기화 ──
+    if (typeof DiaryView !== 'undefined') {
+      DiaryView.init(() => {
+        // 일기 변경 시 캘린더 갱신 (인디케이터 반영)
+        _refreshCalendar();
+      });
+    }
+
+    // ── 할일 리스트 초기화 ──
+    if (typeof TodoView !== 'undefined') {
+      TodoView.init(() => {
+        // 할일 변경 시 캘린더 갱신 (인디케이터 반영)
+        _refreshCalendar();
+      });
+    }
+
+    // FAB 버튼: 활성 탭에 따라 다른 모달 열기
     const btnAdd = document.getElementById('btn-add-event');
     if (btnAdd) {
       btnAdd.addEventListener('click', () => {
-        EventModal.open(CalendarRenderer.getSelectedDate());
+        const activeTab = typeof TabController !== 'undefined' ? TabController.getActiveTab() : 'calendar';
+        switch (activeTab) {
+          case 'diary':
+            if (typeof DiaryView !== 'undefined') {
+              DiaryView.openEditor(CalendarRenderer.getSelectedDate());
+            }
+            break;
+          case 'todo':
+            if (typeof TodoView !== 'undefined') {
+              TodoView.openModal();
+            }
+            break;
+          case 'calendar':
+          default:
+            EventModal.open(CalendarRenderer.getSelectedDate());
+            break;
+        }
       });
     }
 
     // 캘린더 초기화
     CalendarRenderer.init(elements, (dateStr) => {
       _renderEventList(dateStr, _scheduleTitle, _eventList);
+      // 일기장이 활성 탭이면 해당 날짜의 일기도 갱신
+      if (typeof TabController !== 'undefined' && TabController.getActiveTab() === 'diary') {
+        if (typeof DiaryView !== 'undefined') DiaryView.render(dateStr);
+      }
     });
 
     // 오늘 날짜의 일정 표시
@@ -313,6 +356,36 @@ const App = (() => {
     const indicator = document.getElementById('sync-indicator');
     if (indicator) {
       indicator.style.display = show ? 'flex' : 'none';
+    }
+  }
+
+  // ==============================
+  // 탭 전환 처리
+  // ==============================
+
+  /**
+   * 탭 변경 시 콜백
+   * @param {string} tabName - 새 탭 이름
+   * @param {string} prevTab - 이전 탭 이름
+   */
+  function _onTabChange(tabName, prevTab) {
+    const selectedDate = CalendarRenderer.getSelectedDate();
+
+    switch (tabName) {
+      case 'diary':
+        if (typeof DiaryView !== 'undefined') {
+          DiaryView.render(selectedDate);
+        }
+        break;
+      case 'todo':
+        if (typeof TodoView !== 'undefined') {
+          TodoView.render();
+        }
+        break;
+      case 'calendar':
+        // 캘린더로 돌아올 때 재렌더링 (인디케이터 갱신)
+        _refreshCalendar();
+        break;
     }
   }
 

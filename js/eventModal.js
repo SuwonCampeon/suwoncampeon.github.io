@@ -54,11 +54,15 @@ const EventModal = (() => {
       _handleSave();
     });
 
-    _btnDelete.addEventListener('click', () => {
-      if (confirm('정말로 이 일정을 삭제하시겠습니까?')) {
-        _onDeleteCallback(_idIn.value);
-        close();
-      }
+    _btnDelete.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(() => {
+        if (confirm('정말로 이 일정을 삭제하시겠습니까?')) {
+          _onDeleteCallback(_idIn.value);
+          close();
+        }
+      }, 150); // 키보드 닫힘 등 화면 리사이즈 후 confirm이 뜨도록 지연
     });
 
     // 테마 변경에 따른 타임 피커 UI 토글 감지 (app.js에서 테마 바꿀 때 사용)

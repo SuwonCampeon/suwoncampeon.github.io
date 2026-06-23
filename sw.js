@@ -1,14 +1,20 @@
-const CACHE_NAME = 'calendar-cache-v3';
+const CACHE_NAME = 'calendar-cache-v4';
 const urlsToCache = [
   './',
   './index.html',
   './css/variables.css',
   './css/layout.css',
   './css/calendar.css',
+  './css/diary.css',
+  './css/todo.css',
   './js/data.js',
   './js/googleAuth.js',
   './js/googleCalendarAPI.js',
   './js/calendar.js',
+  './js/eventModal.js',
+  './js/tabController.js',
+  './js/diary.js',
+  './js/todo.js',
   './js/app.js',
   './manifest.json',
   './images/icon.svg'

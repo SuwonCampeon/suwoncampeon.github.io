@@ -662,3 +662,34 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ── 일기/할일 인디케이터 ── */
+.date-cell__diary-dot,
+.date-cell__todo-dot {
+  position: absolute;
+  font-size: 0.5rem;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 6;
+}
+
+.date-cell__diary-dot {
+  bottom: 1px;
+  left: 2px;
+}
+
+.date-cell__todo-dot {
+  bottom: 1px;
+  right: 2px;
+}
+
+/* PC통신 테마: 텍스트 기반 인디케이터 */
+[data-theme="pctel"] .date-cell__diary-dot,
+[data-theme="pctel"] .date-cell__todo-dot {
+  font-family: var(--font-family-ui);
+  font-size: 0.45rem;
+  font-weight: var(--font-weight-bold);
+  opacity: 1;
+}
+
