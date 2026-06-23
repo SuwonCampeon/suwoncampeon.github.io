@@ -44,10 +44,18 @@ self.addEventListener('fetch', event => {
   }
   
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // 캐시에 있으면 반환, 없으면 네트워크 요청
-        return response || fetch(event.request);
+        // 네트워크 성공 시 항상 캐시를 최신 상태로 업데이트
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // 오프라인이거나 네트워크 에러 시 캐시에서 반환
+        return caches.match(event.request);
       })
   );
 });
