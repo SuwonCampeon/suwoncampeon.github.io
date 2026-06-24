@@ -226,3 +226,92 @@
   --tab-bar-inactive:    #00FFFF;
   --tab-bar-label:       #00FFFF;
 }
+
+/* ============================================
+   수원삼성블루윙즈 테마 (Suwon)
+   청색(메인), 백색/적색(보조)
+   ============================================ */
+[data-theme="suwon"] {
+  /* ── 배경 및 테마 메인 (수원 청색 계열) ── */
+  --leather-dark:       #002f6c; /* 매우 진한 청색 (위쪽 삼각형) */
+  --leather-mid:        #003882;
+  --leather-light:      #004ea2; /* 연하고 푸르딩딩한 색 (아래쪽 삼각형) */
+  --leather-highlight:  #001e4a;
+  --leather-stitch:     #e01e26; /* 구단 적색으로 스티치 효과 */
+
+  /* ── 헤더 ── */
+  --green-dark:         #002f6c;
+  --green-mid:          #004ea2;
+  --green-light:        #005bb5;
+  --green-shine:        #0073e6;
+  --green-linen-1:      hsla(213, 100%, 25%, 0.9);
+  --green-linen-2:      hsla(213, 100%, 30%, 0.6);
+
+  /* ── 달력 영역 (어두운 계열/반투명) ── */
+  --paper-warm:         rgba(0, 30, 74, 0.6);
+  --paper-cream:        rgba(0, 47, 108, 0.6);
+  --paper-aged:         rgba(0, 56, 130, 0.6);
+  --paper-darker:       rgba(0, 78, 162, 0.6);
+  --paper-line:         rgba(255, 255, 255, 0.1);
+  --paper-shadow:       rgba(0, 0, 0, 0.5);
+
+  /* ── 텍스트 ── */
+  --text-dark:          #ffffff; /* 흰색 텍스트 */
+  --text-mid:           #f8fafc;
+  --text-light:         #cbd5e1;
+  --text-on-green:      #ffffff;
+  --text-emboss-light:  hsla(0, 0%, 100%, 0.1);
+  --text-emboss-dark:   hsla(0, 0%, 0%, 0.5);
+
+  /* ── 일정 색상 ── */
+  --event-color-blue:   #004ea2;
+  --event-color-green:  #10b981;
+  --event-color-orange: #f59e0b;
+  --event-color-pink:   #ec4899;
+  --event-color-purple: #8b5cf6;
+  --event-color-teal:   #14b8a6;
+  --event-color-red:    #e01e26;
+  --event-color-gray:   #64748b;
+  --event-color-default:#004ea2;
+
+  /* ── 강조 색상 (구단 적색) ── */
+  --accent-red:         #e01e26;
+  --accent-red-light:   #ef4444;
+  --accent-red-dark:    #b91c1c;
+
+  /* ── 금속 (버튼용) ── */
+  --metal-light:        #e2e8f0;
+  --metal-mid:          #cbd5e1;
+  --metal-dark:         #94a3b8;
+  --metal-rim:          #64748b;
+  --metal-shine:        #f8fafc;
+
+  /* ── 기타 컴포넌트 ── */
+  --diary-bg:            var(--paper-cream);
+  --diary-text:          var(--text-dark);
+  --diary-line-color:    var(--paper-line);
+  --diary-placeholder:   var(--text-light);
+  --diary-mood-bg:       hsla(213, 50%, 90%, 0.6);
+  --diary-photo-border:  var(--paper-shadow);
+
+  --todo-bg:             var(--paper-warm);
+  --todo-text:           var(--text-dark);
+  --todo-check-color:    var(--accent-red);
+  --todo-done-text:      var(--text-light);
+  --todo-priority-high:  #e01e26;
+  --todo-priority-medium:#f59e0b;
+  --todo-priority-low:   #004ea2;
+  --todo-category-work:  #004ea2;
+  --todo-category-study: #8b5cf6;
+  --todo-category-exercise: #10b981;
+  --todo-category-life:  #f59e0b;
+  --todo-progress-bg:    #cbd5e1;
+  --todo-progress-fill:  #004ea2;
+
+  /* ── 탭 바 ── */
+  --tab-bar-bg:          #001e4a;
+  --tab-bar-border:      #002f6c;
+  --tab-bar-active:      #e01e26;
+  --tab-bar-inactive:    #94a3b8;
+  --tab-bar-label:       #cbd5e1;
+}

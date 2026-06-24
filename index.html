@@ -71,6 +71,7 @@
           <div class="motion-toggle">
             <button class="motion-btn theme-btn active" id="btn-theme-vintage" data-theme="vintage" aria-pressed="true">빈티지</button>
             <button class="motion-btn theme-btn"        id="btn-theme-pctel"   data-theme="pctel" aria-pressed="false">PC통신</button>
+            <button class="motion-btn theme-btn"        id="btn-theme-suwon"   data-theme="suwon" aria-pressed="false">수원삼성</button>
           </div>
         </li>
         <li class="settings-menu__item">
@@ -195,8 +196,13 @@
           </div>
           
           <div class="form-group form-group--inline">
-            <label class="form-label" for="event-date">날짜</label>
-            <input type="date" id="event-date" class="form-input" required>
+            <label class="form-label" for="event-start-date">시작일</label>
+            <input type="date" id="event-start-date" class="form-input" required>
+          </div>
+          
+          <div class="form-group form-group--inline">
+            <label class="form-label" for="event-end-date">종료일</label>
+            <input type="date" id="event-end-date" class="form-input" required>
           </div>
           
           <!-- 시간 입력 래퍼 (테마에 따라 다르게 표시) -->
@@ -378,6 +384,7 @@
             <div class="share-theme-selector">
               <button type="button" class="btn share-theme-btn active" data-share-theme="vintage">빈티지</button>
               <button type="button" class="btn share-theme-btn" data-share-theme="pctel">PC통신</button>
+              <button type="button" class="btn share-theme-btn" data-share-theme="suwon">수원삼성</button>
             </div>
           </div>
         </div>

@@ -35,9 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function _applyTheme(theme) {
-  // 테마 값이 'pctel'이면 전체 html 요소에 data-theme 설정
+  // 수신된 테마 값에 따라 전체 html 요소에 data-theme 설정
   if (theme === 'pctel') {
     document.documentElement.setAttribute('data-theme', 'pctel');
+  } else if (theme === 'suwon') {
+    document.documentElement.setAttribute('data-theme', 'suwon');
   } else {
     document.documentElement.setAttribute('data-theme', 'vintage');
   }

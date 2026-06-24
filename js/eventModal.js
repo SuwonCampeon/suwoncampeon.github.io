@@ -6,7 +6,7 @@ const EventModal = (() => {
   const COLORS = ['blue', 'green', 'orange', 'pink', 'purple', 'teal', 'red', 'gray', 'default'];
   
   // DOM
-  let _overlay, _modal, _form, _titleIn, _alldayCb, _dateIn;
+  let _overlay, _modal, _form, _titleIn, _alldayCb, _startDateIn, _endDateIn;
   let _startHrD, _startMinD, _endHrD, _endMinD; // digital
   let _locationIn, _colorIn, _colorPicker, _btnDelete, _idIn;
 
@@ -24,11 +24,26 @@ const EventModal = (() => {
     _idIn = document.getElementById('event-id');
     _titleIn = document.getElementById('event-title');
     _alldayCb = document.getElementById('event-allday');
-    _dateIn = document.getElementById('event-date');
+    _startDateIn = document.getElementById('event-start-date');
+    _endDateIn = document.getElementById('event-end-date');
     _locationIn = document.getElementById('event-location');
     _colorIn = document.getElementById('event-color');
     _colorPicker = document.getElementById('event-color-picker');
     _btnDelete = document.getElementById('btn-delete-event');
+
+    // 시작일 변경 시 종료일이 시작일보다 빠르면 종료일을 시작일과 같게 맞춤
+    if (_startDateIn && _endDateIn) {
+      _startDateIn.addEventListener('change', () => {
+        if (_endDateIn.value < _startDateIn.value) {
+          _endDateIn.value = _startDateIn.value;
+        }
+      });
+      _endDateIn.addEventListener('change', () => {
+        if (_endDateIn.value < _startDateIn.value) {
+          _startDateIn.value = _endDateIn.value;
+        }
+      });
+    }
 
     _startHrD = document.getElementById('event-start-time');
     _endHrD = document.getElementById('event-end-time');
@@ -193,7 +208,8 @@ const EventModal = (() => {
     _form.reset();
     
     // Set Date
-    _dateIn.value = dateStr;
+    _startDateIn.value = dateStr;
+    _endDateIn.value = dateStr;
 
     if (existingEvent) {
       // EDIT MODE
@@ -205,6 +221,9 @@ const EventModal = (() => {
       _locationIn.value = existingEvent.location || '';
       _alldayCb.checked = existingEvent.allDay;
       
+      if (existingEvent.startDate) _startDateIn.value = existingEvent.startDate;
+      if (existingEvent.endDate) _endDateIn.value = existingEvent.endDate;
+      
       // Set Color
       const colorToSelect = existingEvent.color || 'blue';
       _colorIn.value = colorToSelect;
@@ -214,10 +233,12 @@ const EventModal = (() => {
 
       // Set Time
       if (!existingEvent.allDay) {
-        _startHrD.value = existingEvent.startTime;
-        _endHrD.value = existingEvent.endTime;
-        _setTumblerTime('start', existingEvent.startTime);
-        _setTumblerTime('end', existingEvent.endTime);
+        const sTime = existingEvent.originalStartTime || existingEvent.startTime;
+        const eTime = existingEvent.originalEndTime || existingEvent.endTime;
+        _startHrD.value = sTime;
+        _endHrD.value = eTime;
+        _setTumblerTime('start', sTime);
+        _setTumblerTime('end', eTime);
       } else {
         _setTumblerTime('start', '12:00');
         _setTumblerTime('end', '13:00');
@@ -277,7 +298,9 @@ const EventModal = (() => {
     const eventData = {
       id: _idIn.value || `local-${Date.now()}`,
       title: _titleIn.value.trim(),
-      date: _dateIn.value,
+      startDate: _startDateIn.value,
+      endDate: _endDateIn.value,
+      date: _startDateIn.value, // Used as primary date if needed
       startTime: startTime,
       endTime: endTime,
       location: _locationIn.value.trim() || null,

@@ -99,6 +99,11 @@ const GoogleCalendarAPI = (() => {
       // endDate는 exclusive이므로 하루 전까지 생성
       const current = new Date(startDate);
       const totalDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+      
+      // Calculate display endDate (inclusive) for the editor
+      const displayEndDate = new Date(endDate);
+      displayEndDate.setDate(displayEndDate.getDate() - 1);
+      const displayEndDateStr = _formatDate(displayEndDate);
 
       for (let dayCount = 0; dayCount < totalDays; dayCount++) {
         let multiDayState = 'single';
@@ -112,6 +117,8 @@ const GoogleCalendarAPI = (() => {
           id:        `g-${gEvent.id}-${_formatDate(current)}`,
           title:     title,
           date:      _formatDate(current),
+          startDate: _formatDate(startDate),
+          endDate:   displayEndDateStr,
           startTime: null,
           endTime:   null,
           location:  location,
@@ -129,35 +136,49 @@ const GoogleCalendarAPI = (() => {
     const startDT = new Date(gEvent.start.dateTime);
     const endDT   = new Date(gEvent.end.dateTime);
 
-    // 날짜가 다른 경우 (자정을 넘기는 이벤트)
     const startDateStr = _formatDate(startDT);
     const endDateStr   = _formatDate(endDT);
+    
+    const startObj = new Date(startDT.getFullYear(), startDT.getMonth(), startDT.getDate());
+    const endObj = new Date(endDT.getFullYear(), endDT.getMonth(), endDT.getDate());
+    const totalDays = Math.round((endObj - startObj) / (1000 * 60 * 60 * 24)) + 1;
 
-    if (startDateStr !== endDateStr) {
-      // 시작일: 시작 시간 ~ 23:59, 종료일: 00:00 ~ 종료 시간
+    if (totalDays > 1) {
       const events = [];
-      events.push({
-        id:        `g-${gEvent.id}-${startDateStr}`,
-        title:     title,
-        date:      startDateStr,
-        startTime: _formatTime(startDT),
-        endTime:   '23:59',
-        location:  location,
-        color:     color,
-        allDay:    false,
-        multiDayState: 'start'
-      });
-      events.push({
-        id:        `g-${gEvent.id}-${endDateStr}`,
-        title:     title,
-        date:      endDateStr,
-        startTime: '00:00',
-        endTime:   _formatTime(endDT),
-        location:  location,
-        color:     color,
-        allDay:    false,
-        multiDayState: 'end'
-      });
+      const current = new Date(startObj);
+      
+      for (let dayCount = 0; dayCount < totalDays; dayCount++) {
+        let multiDayState = 'single';
+        if (dayCount === 0) multiDayState = 'start';
+        else if (dayCount === totalDays - 1) multiDayState = 'end';
+        else multiDayState = 'middle';
+        
+        const dateStr = _formatDate(current);
+        let st = _formatTime(startDT);
+        let et = _formatTime(endDT);
+        
+        if (multiDayState === 'start') { et = '23:59'; }
+        else if (multiDayState === 'end') { st = '00:00'; }
+        else if (multiDayState === 'middle') { st = '00:00'; et = '23:59'; }
+
+        events.push({
+          id:        `g-${gEvent.id}-${dateStr}`,
+          title:     title,
+          date:      dateStr,
+          startDate: startDateStr,
+          endDate:   endDateStr,
+          startTime: st,
+          endTime:   et,
+          originalStartTime: _formatTime(startDT),
+          originalEndTime: _formatTime(endDT),
+          location:  location,
+          color:     color,
+          allDay:    false,
+          multiDayState: multiDayState
+        });
+        
+        current.setDate(current.getDate() + 1);
+      }
       return events;
     }
 
@@ -165,8 +186,12 @@ const GoogleCalendarAPI = (() => {
       id:        `g-${gEvent.id}`,
       title:     title,
       date:      startDateStr,
+      startDate: startDateStr,
+      endDate:   endDateStr,
       startTime: _formatTime(startDT),
       endTime:   _formatTime(endDT),
+      originalStartTime: _formatTime(startDT),
+      originalEndTime: _formatTime(endDT),
       location:  location,
       color:     color,
       allDay:    false,
@@ -318,15 +343,15 @@ const GoogleCalendarAPI = (() => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     if (eventData.allDay) {
-      gEvent.start.date = eventData.date;
+      gEvent.start.date = eventData.startDate || eventData.date;
       
-      const [y, m, d] = eventData.date.split('-').map(Number);
+      const [y, m, d] = (eventData.endDate || eventData.date).split('-').map(Number);
       const endDate = new Date(y, m - 1, d + 1); // next day
       gEvent.end.date = _formatDate(endDate);
     } else {
-      gEvent.start.dateTime = `${eventData.date}T${eventData.startTime}:00`;
+      gEvent.start.dateTime = `${eventData.startDate || eventData.date}T${eventData.startTime}:00`;
       gEvent.start.timeZone = timeZone;
-      gEvent.end.dateTime = `${eventData.date}T${eventData.endTime}:00`;
+      gEvent.end.dateTime = `${eventData.endDate || eventData.date}T${eventData.endTime}:00`;
       gEvent.end.timeZone = timeZone;
     }
 

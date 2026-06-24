@@ -1046,3 +1046,119 @@ body {
   color: var(--leather-dark);
   border: 1px solid var(--text-light);
 }
+
+/* ============================================
+   수원삼성블루윙즈 테마 (Suwon) 오버라이드
+   ============================================ */
+[data-theme="suwon"] body {
+  background-color: var(--leather-dark);
+  background-image: none;
+}
+
+[data-theme="suwon"] .app-shell {
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  /* 유니폼 소매 띠: 흰색 선을 절반 두께(0.5px)로 얇게 수정 */
+  border-image: linear-gradient(
+    to right, 
+    var(--accent-red) 0px, var(--accent-red) 1.25px, 
+    white 1.25px, white 1.75px, 
+    var(--accent-red) 1.75px, var(--accent-red) 3px,
+    transparent 3px, transparent calc(100% - 3px),
+    var(--accent-red) calc(100% - 3px), var(--accent-red) calc(100% - 1.75px),
+    white calc(100% - 1.75px), white calc(100% - 1.25px),
+    var(--accent-red) calc(100% - 1.25px), var(--accent-red) 100%
+  ) 0 3 0 3;
+}
+[data-theme="suwon"] .app-shell::before,
+[data-theme="suwon"] .app-shell::after {
+  /* 유니폼 테마이므로 가죽 스티치는 완전히 숨김 */
+  display: none;
+}
+
+[data-theme="suwon"] .app-header {
+  border-bottom: 3px solid transparent;
+  border-image: linear-gradient(
+    to top, 
+    var(--accent-red) 0px, var(--accent-red) 1.25px, 
+    white 1.25px, white 1.75px, 
+    var(--accent-red) 1.75px, var(--accent-red) 3px,
+    transparent 3px
+  ) 0 0 3 0;
+}
+
+[data-theme="suwon"] .app-content {
+  background: transparent;
+}
+
+[data-theme="suwon"] .bottom-panel {
+  background: transparent;
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(
+    to bottom, 
+    var(--accent-red) 0px, var(--accent-red) 1.25px, 
+    white 1.25px, white 1.75px, 
+    var(--accent-red) 1.75px, var(--accent-red) 3px,
+    transparent 3px
+  ) 3 0 0 0;
+}
+
+[data-theme="suwon"] .bottom-panel__header {
+  border-bottom: 2px solid #ffffff; /* 탭 아래 고정 가로선을 흰색으로 변경 */
+}
+
+[data-theme="suwon"] .share-theme-btn.active {
+  background: var(--leather-dark);
+  color: white;
+  border-color: var(--accent-red);
+}
+
+/* ── 수원 테마 전용: 달력 아래 일정, 일기, 할일 블록 배경을 흰색으로 강제 ── */
+[data-theme="suwon"] .event-card,
+[data-theme="suwon"] .diary-card,
+[data-theme="suwon"] .todo-item {
+  /* 배경색 흰색 오버라이드 */
+  --paper-warm: #ffffff;
+  --paper-cream: #ffffff;
+  --todo-bg: #ffffff;
+  --diary-bg: #ffffff;
+  
+  /* 밝은 배경에 맞춰 텍스트를 모두 어두운 수원 청색 계열로 반전 */
+  --text-dark: #001e4a;
+  --text-mid: #002f6c;
+  --text-light: #64748b;
+  --diary-text: #001e4a;
+  --todo-text: #001e4a;
+  --todo-done-text: #94a3b8;
+  --paper-line: rgba(0, 0, 0, 0.08); /* 줄무늬도 연하게 */
+  --diary-mood-bg: #f1f5f9;
+  
+  color: var(--text-dark); /* 상속 방어 */
+}
+
+/* ── 수원 테마 전용: 헤더 버튼 흰색 배경, 파란색 텍스트 ── */
+[data-theme="suwon"] .app-header__btn {
+  background: #ffffff;
+  color: #004ea2;
+  border-color: #ffffff;
+  text-shadow: none;
+  box-shadow: 0 2px 4px hsla(0, 0%, 0%, 0.2);
+}
+
+[data-theme="suwon"] .app-header__btn:active {
+  background: #f8fafc;
+  box-shadow: inset 0 2px 4px hsla(0, 0%, 0%, 0.1);
+  transform: translateY(1px);
+}
+
+[data-theme="suwon"] .app-header__today-btn {
+  background: #ffffff;
+  color: #004ea2;
+  border-color: #ffffff;
+  box-shadow: 0 2px 5px hsla(0, 0%, 0%, 0.35);
+}
+
+[data-theme="suwon"] .app-header__today-btn:active {
+  background: #f8fafc;
+  box-shadow: inset 0 2px 4px hsla(0, 0%, 0%, 0.2);
+}

@@ -115,9 +115,12 @@ const App = (() => {
       _updateHeaderUI();
     });
 
-    // 초기 테마 로드
+    // 초기 테마 및 전환효과 로드
     const savedTheme = localStorage.getItem('app_theme') || 'vintage';
     _setThemeMode(savedTheme);
+
+    const savedMotion = localStorage.getItem('app_motion') || 'cube';
+    _setMotionMode(savedMotion);
 
     // ── 모션 토글 버튼 ──
     document.querySelectorAll('.motion-btn:not(.theme-btn)').forEach(btn => {
@@ -428,6 +431,7 @@ const App = (() => {
    */
   function _setMotionMode(mode) {
     _motionMode = mode;
+    localStorage.setItem('app_motion', mode);
 
     // 버튼 상태 동기화
     document.querySelectorAll('.motion-btn:not(.theme-btn)').forEach(btn => {
@@ -555,12 +559,19 @@ const App = (() => {
       try {
         const token = await GoogleAuth.ensureValidToken();
         if (isEdit) {
-          const updated = await GoogleCalendarAPI.updateEvent(token, eventData.id, eventData);
-          DataManager.updateEvent(eventData.id, updated);
+          await GoogleCalendarAPI.updateEvent(token, eventData.id, eventData);
         } else {
-          const inserted = await GoogleCalendarAPI.insertEvent(token, eventData);
-          DataManager.addEvent(inserted);
+          await GoogleCalendarAPI.insertEvent(token, eventData);
         }
+        
+        // 다중 날짜 일정 등 복잡한 변화가 있을 수 있으므로 현재 월 데이터 다시 불러오기
+        const currentMonth = CalendarRenderer.getCurrentMonth();
+        const events = await GoogleCalendarAPI.fetchMonthEvents(
+          token,
+          currentMonth.year,
+          currentMonth.month
+        );
+        DataManager.setEvents(events);
         _refreshCalendar();
       } catch (error) {
         console.error('[App] 일정 저장 실패:', error);
@@ -569,12 +580,62 @@ const App = (() => {
         _showSyncIndicator(false);
       }
     } else {
-      // 로컬에만 저장
+      // 로컬에만 저장: 다중 날짜 지원을 위해 시작일부터 종료일까지 각 날짜별로 분할해서 저장
+      const startDate = new Date(eventData.startDate || eventData.date);
+      const endDate = new Date(eventData.endDate || eventData.date);
+      const totalDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      
+      const current = new Date(startDate);
+      
+      // 기존 이벤트 삭제 후 다시 추가 (편집의 경우)
       if (isEdit) {
-        DataManager.updateEvent(eventData.id, eventData);
-      } else {
-        DataManager.addEvent(eventData);
+        // 기존 ID와 연결된 다중 날짜 이벤트들을 모두 찾기 위해
+        // 동일 base ID로 생성된 항목들을 지웁니다.
+        const baseId = eventData.id.split('-')[1] || eventData.id;
+        const allEvts = DataManager.getAllEvents();
+        allEvts.forEach(e => {
+          if (e.id === eventData.id || e.id.includes(`-${baseId}-`)) {
+            DataManager.removeEvent(e.id);
+          }
+        });
       }
+      
+      const baseId = isEdit ? (eventData.id.split('-')[1] || eventData.id) : Date.now();
+      
+      for (let dayCount = 0; dayCount < totalDays; dayCount++) {
+        let multiDayState = 'single';
+        if (totalDays > 1) {
+          if (dayCount === 0) multiDayState = 'start';
+          else if (dayCount === totalDays - 1) multiDayState = 'end';
+          else multiDayState = 'middle';
+        }
+        
+        const y = current.getFullYear();
+        const m = String(current.getMonth() + 1).padStart(2, '0');
+        const d = String(current.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${d}`;
+        
+        let st = eventData.startTime;
+        let et = eventData.endTime;
+        
+        if (!eventData.allDay && totalDays > 1) {
+          if (multiDayState === 'start') { et = '23:59'; }
+          else if (multiDayState === 'end') { st = '00:00'; }
+          else if (multiDayState === 'middle') { st = '00:00'; et = '23:59'; }
+        }
+
+        DataManager.addEvent({
+          ...eventData,
+          id: `local-${baseId}-${dateStr}`,
+          date: dateStr,
+          startTime: st,
+          endTime: et,
+          multiDayState: multiDayState
+        });
+        
+        current.setDate(current.getDate() + 1);
+      }
+      
       _refreshCalendar();
     }
   }
@@ -589,6 +650,15 @@ const App = (() => {
         const token = await GoogleAuth.ensureValidToken();
         await GoogleCalendarAPI.deleteEvent(token, eventId);
         DataManager.removeEvent(eventId);
+        
+        // Refresh the whole month to ensure any multi-day events are correctly synchronized
+        const currentMonth = CalendarRenderer.getCurrentMonth();
+        const events = await GoogleCalendarAPI.fetchMonthEvents(
+          token,
+          currentMonth.year,
+          currentMonth.month
+        );
+        DataManager.setEvents(events);
         _refreshCalendar();
       } catch (error) {
         console.error('[App] 일정 삭제 실패:', error);
@@ -597,7 +667,13 @@ const App = (() => {
         _showSyncIndicator(false);
       }
     } else {
-      DataManager.removeEvent(eventId);
+      const baseId = eventId.split('-')[1] || eventId;
+      const allEvts = DataManager.getAllEvents();
+      allEvts.forEach(e => {
+        if (e.id === eventId || e.id.includes(`-${baseId}-`)) {
+          DataManager.removeEvent(e.id);
+        }
+      });
       _refreshCalendar();
     }
   }

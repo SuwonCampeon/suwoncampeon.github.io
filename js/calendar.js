@@ -241,11 +241,20 @@ const CalendarRenderer = (() => {
     if (cell.dateStr === _formatDate(new Date())) el.classList.add('date-cell--today');
     if (cell.dateStr === _selectedDate)       el.classList.add('date-cell--selected');
 
+    // 옐로/레드 카드 시스템을 위한 다이나믹 컨테이너 (수원 테마용)
+    const cardsContainer = document.createElement('div');
+    cardsContainer.className = 'date-cell__cards-container';
+    el.appendChild(cardsContainer);
+
     // 날짜 숫자
     const numEl = document.createElement('span');
     numEl.className = 'date-cell__number';
     numEl.textContent = cell.day;
     el.appendChild(numEl);
+
+    let hasRedCard = false;
+    let hasYellowCard = false;
+    let starCount = 0;
 
     // 일정 아날로그 인디케이터 & 하이라이터
     const events = eventsMap.get(cell.dateStr);
@@ -259,12 +268,32 @@ const CalendarRenderer = (() => {
 
       events.forEach((evt, idx) => {
         const state = evt.multiDayState || 'single';
+        
+        // 단일 일정일 때만 레드/옐로 카드로 취급
+        if (state === 'single') {
+          if (evt.color === 'red') hasRedCard = true;
+          else if (evt.color === 'orange') hasYellowCard = true;
+          else if (['blue', 'green', 'purple', 'pink', 'teal', 'yellow'].includes(evt.color)) {
+            starCount++;
+          }
+        }
 
         // 1. 형광펜 효과 (멀티데이 일정인 경우)
         if (state !== 'single') {
           const highlighter = document.createElement('div');
           highlighter.className = `highlighter-bar highlighter-bar--${state}`;
           highlighter.style.backgroundColor = `var(--event-color-${evt.color})`;
+          highlighter.dataset.color = evt.color; // suwon 테마 배너 색상 적용 지원용
+          
+          // 수원 테마 등에서 배너가 한 번만 출력되도록 처리
+          // 일정이 시작되는 날이거나, 해당 주차의 시작일(일요일)인 경우에만 텍스트 렌더링
+          if (state === 'start' || cell.dayOfWeek === 0) {
+            const highlighterText = document.createElement('span');
+            highlighterText.className = 'highlighter-text';
+            highlighterText.textContent = evt.title;
+            highlighter.appendChild(highlighterText);
+          }
+
           highlightersEl.appendChild(highlighter);
         }
 
@@ -272,6 +301,7 @@ const CalendarRenderer = (() => {
         if ((state === 'single' || state === 'start') && analogCount < 2) {
           const type = _categorizeEventByColor(evt.color);
           const indicator = document.createElement('div');
+          indicator.dataset.color = evt.color; // suwon 테마용
           indicator.style.setProperty('--ind-color', `var(--event-color-${evt.color})`);
           
           if (type === 'pin') {
@@ -291,7 +321,10 @@ const CalendarRenderer = (() => {
             indicator.className = `indicator-hole`;
           }
           
+          // 모든 개별 인디케이터는 원본 el에 붙임 (vintage, pctel 테마 호환성 유지)
+          // 수원 테마에서는 CSS(display: none)로 기존 인디케이터를 숨기고, 나중에 생성될 통합 suwonCard만 보여주게 됨.
           el.appendChild(indicator);
+          
           analogCount++;
         }
       });
@@ -313,11 +346,60 @@ const CalendarRenderer = (() => {
         const allDone = todos.every(t => t.completed);
         const todoDot = document.createElement('div');
         todoDot.className = 'date-cell__todo-dot';
+        
+        let highestPriority = 'low';
+        let hasWhiteCard = false;
+        
+        if (!allDone) {
+          const hasHigh = todos.some(t => !t.completed && t.priority === 'high');
+          const hasMedium = todos.some(t => !t.completed && t.priority === 'medium');
+          highestPriority = hasHigh ? 'high' : (hasMedium ? 'medium' : 'low');
+          
+          if (hasHigh) el.dataset.hasRedCard = 'true'; // store temporarily
+          if (hasMedium) el.dataset.hasYellowCard = 'true';
+          if (!hasHigh && !hasMedium) hasWhiteCard = true;
+        }
+        todoDot.dataset.priority = highestPriority;
+
         todoDot.textContent = allDone ? '✅' : '📝';
         todoDot.setAttribute('aria-label', allDone ? '할일 모두 완료' : '할일 있음');
+        
+        // 할일 인디케이터도 무조건 원본 el에 붙임 (vintage, pctel 테마 호환성)
         el.appendChild(todoDot);
       }
     }
+
+    // 통합 카드 생성 (수원 테마 전용)
+    const finalHasRed = el.dataset.hasRedCard === 'true' || hasRedCard;
+    const finalHasYellow = el.dataset.hasYellowCard === 'true' || hasYellowCard;
+    const finalHasWhite = typeof TodoManager !== 'undefined' && TodoManager.getByDueDate(cell.dateStr).some(t => !t.completed && t.priority === 'low') && !finalHasRed && !finalHasYellow;
+
+    if (finalHasRed || finalHasYellow || finalHasWhite) {
+      const suwonCard = document.createElement('div');
+      suwonCard.className = 'date-cell__suwon-card';
+      if (finalHasRed && finalHasYellow) {
+        suwonCard.dataset.state = 'both';
+      } else if (finalHasRed) {
+        suwonCard.dataset.state = 'red';
+      } else if (finalHasYellow) {
+        suwonCard.dataset.state = 'yellow';
+      } else {
+        suwonCard.dataset.state = 'white';
+      }
+      cardsContainer.appendChild(suwonCard);
+    }
+    
+    // 통합 별 생성 (수원 테마 전용)
+    if (starCount > 0) {
+      const suwonStars = document.createElement('div');
+      suwonStars.className = 'date-cell__suwon-stars';
+      suwonStars.textContent = '★'; // 일정이 여러 개여도 무조건 별 1개만 표시
+      el.appendChild(suwonStars);
+    }
+    
+    // cleanup
+    delete el.dataset.hasRedCard;
+    delete el.dataset.hasYellowCard;
 
     el.addEventListener('click', () => _selectDate(cell.dateStr));
     return el;
