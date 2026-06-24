@@ -464,7 +464,8 @@
 }
 
 [data-theme="pctel"] .priority-option.selected {
-  background: transparent;
+  background: var(--text-light);
+  color: var(--leather-dark);
 }
 
 [data-theme="pctel"] .category-option {
